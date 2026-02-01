@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Box, Button, Avatar, Link as MuiLink } from '@mui/material';
 import { getDay } from '../../../../../shared/utils/date';
 import { useAtomValue } from 'jotai';
@@ -18,13 +18,17 @@ import {
 import { useA2ZTheme } from '../../../../../shared/hooks/use-theme';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getAllProjectsResponse } from '../../../../../infra/rest/apis/project/typing';
 import { OutputBlockData } from '@editorjs/editorjs';
 import { CommentsWrapperAtom } from '../../../../../shared/components/organisms/comments-wrapper/states';
 import A2ZTypography from '../../../../../shared/components/atoms/typography';
+import Header from '../../../../../shared/components/organisms/header';
+import A2ZIconButton from '../../../../../shared/components/atoms/icon-button';
 
 const Project = () => {
   const { project_id } = useParams();
+  const navigate = useNavigate();
   const { theme: a2zTheme } = useA2ZTheme();
   const selectedProject = useAtomValue(SelectedProjectAtom);
   const similarProjects = useAtomValue(HomePageProjectsAtom);
@@ -45,6 +49,19 @@ const Project = () => {
   return (
     <>
       {commentsWrapper && <CommentsWrapper />}
+      
+      <Header
+        leftSideChildren={
+          <A2ZIconButton
+            props={{
+              onClick: () => navigate(-1),
+              'aria-label': 'Go back',
+            }}
+          >
+            <ArrowBackIcon />
+          </A2ZIconButton>
+        }
+      />
 
       <Box
         sx={{
