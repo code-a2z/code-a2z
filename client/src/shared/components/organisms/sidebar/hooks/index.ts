@@ -12,7 +12,6 @@ import {
 } from '../../../../../app/routes/constants/routes';
 import { useAuth } from '../../../../hooks/use-auth';
 
-
 const logoutStyle = {
   marginTop: 'auto',
   marginBottom: 0,
@@ -20,8 +19,20 @@ const logoutStyle = {
 
 const useSidebar = () => {
   const [showExpandedView, setShowExpandedView] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const { logout } = useAuth();
 
+  // open modal
+  const handleLogoutClick = useCallback(() => {
+    setShowLogoutModal(true);
+  }, []);
+
+  // confirm logout
+  const confirmLogout = useCallback(() => {
+    setShowLogoutModal(false);
+    logout();
+  }, [logout]);
 
   const handleMouseHoverIn = useCallback(() => {
     setShowExpandedView(true);
@@ -30,7 +41,6 @@ const useSidebar = () => {
   const handleMouseHoverOut = useCallback(() => {
     setShowExpandedView(false);
   }, []);
-
 
   const sidebarItems = useMemo(() => {
     const items: SideBarItemsType[] = [
@@ -68,27 +78,33 @@ const useSidebar = () => {
         screenName: ROUTES_PAGE_V1.SETTINGS,
       },
     ];
-    
+
     const secondaryItems: SideBarItemsType[] = [
       {
         icon: PowerSettingsNewIcon,
-        onClick: logout, 
+        onClick: handleLogoutClick,
         title: 'Logout',
         style: logoutStyle,
       },
     ];
+
     return {
       items: items.filter(({ disable }) => !disable),
       secondaryItems: secondaryItems.filter(({ disable }) => !disable),
     };
-  }, [logout]);
-
+  }, [handleLogoutClick]);
 
   return {
     showExpandedView,
     handleMouseHoverIn,
     handleMouseHoverOut,
     sidebarItems,
+
+    // modal controls
+    showLogoutModal,
+    setShowLogoutModal,
+    confirmLogout,
   };
 };
+
 export default useSidebar;
