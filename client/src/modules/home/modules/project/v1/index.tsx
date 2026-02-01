@@ -24,6 +24,7 @@ import { OutputBlockData } from '@editorjs/editorjs';
 import { CommentsWrapperAtom } from '../../../../../shared/components/organisms/comments-wrapper/states';
 import A2ZTypography from '../../../../../shared/components/atoms/typography';
 import Header from '../../../../../shared/components/organisms/header';
+import A2ZIconButton from '../../../../../shared/components/atoms/icon-button';
 
 const Project = () => {
   const { project_id } = useParams();
@@ -47,27 +48,18 @@ const Project = () => {
 
   return (
     <>
-      {commentsWrapper && <CommentsWrapper />}      
+      {commentsWrapper && <CommentsWrapper />}
+      
       <Header
         leftSideChildren={
-          <Box
-            onClick={() => navigate(-1)}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              '&:hover': {
-                opacity: 0.7,
-              },
+          <A2ZIconButton
+            props={{
+              onClick: () => navigate(-1),
+              'aria-label': 'Go back',
             }}
           >
-            <ArrowBackIcon
-              sx={{
-                fontSize: 32,
-                color: 'text.primary',
-              }}
-            />
-          </Box>
+            <ArrowBackIcon />
+          </A2ZIconButton>
         }
       />
 
