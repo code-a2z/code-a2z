@@ -40,3 +40,6 @@ export const CLOUDINARY_API_SECRET =
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'dev.admin@example.com';
 export const RESEND_API_KEY =
   process.env.RESEND_API_KEY || 'dev_resend_key_abc123';
+
+// AI Configuration
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
