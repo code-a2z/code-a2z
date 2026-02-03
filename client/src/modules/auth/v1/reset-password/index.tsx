@@ -81,8 +81,7 @@ const ResetPassword = () => {
               color: 'text.secondary',
             }}
           >
-            Enter your email address and we'll send you a link to reset your
-            password.
+            Enter your email address to receive a link to reset your password.
           </Typography>
 
           <InputBox
