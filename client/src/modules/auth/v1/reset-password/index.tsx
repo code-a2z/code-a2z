@@ -43,32 +43,44 @@ const ResetPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess(false);
 
     try {
-      // TODO: Implement password reset API call here
-      console.log('Reset password for:', email);
+      const response = await fetch('http://localhost:8000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
 
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false);
-        alert('Password reset link sent to your email!');
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
         setEmail(''); // Clear email after success
-      }, 2000);
+      } else {
+        setError(data.message || 'Failed to send reset link. Please try again.');
+      }
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      setError('Something went wrong. Please try again later.');
       console.error('Error:', err);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
+    setError(''); // Clear error when user types
+    setSuccess(false); // Clear success when user types
   };
 
   return (
@@ -95,6 +107,23 @@ const ResetPassword = () => {
             Enter your email address to receive a link to reset your password.
           </Typography>
 
+          {success && (
+            <Typography
+              sx={{
+                color: 'success.main',
+                fontSize: '0.9rem',
+                mb: 1,
+                width: '100%',
+                textAlign: 'center',
+                backgroundColor: 'success.light',
+                padding: '8px 12px',
+                borderRadius: '4px',
+              }}
+            >
+              Password reset link sent successfully! Check your email.
+            </Typography>
+          )}
+
           {error && (
             <Typography
               sx={{
@@ -103,6 +132,9 @@ const ResetPassword = () => {
                 mb: 1,
                 width: '100%',
                 textAlign: 'center',
+                backgroundColor: 'error.light',
+                padding: '8px 12px',
+                borderRadius: '4px',
               }}
             >
               {error}

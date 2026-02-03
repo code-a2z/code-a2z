@@ -44,6 +44,14 @@ const USER_SCHEMA = Schema(
           return `https://api.dicebear.com/6.x/${profile_imgs_collections_list[Math.floor(Math.random() * profile_imgs_collections_list.length)]}/svg?seed=${profile_imgs_name_list[Math.floor(Math.random() * profile_imgs_name_list.length)]}`;
         },
       },
+      resetToken: {
+        type: String,
+        default: null,
+      },
+      resetTokenExpiry: {
+        type: Date,
+        default: null,
+      },
     },
     social_links: {
       youtube: {
