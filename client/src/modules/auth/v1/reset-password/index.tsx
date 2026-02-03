@@ -40,24 +40,35 @@ const StyledFooter = styled('p')(({ theme }) => ({
 }));
 
 const ResetPassword = () => {
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email');
+    try {
+      // TODO: Implement password reset API call here
+      console.log('Reset password for:', email);
 
-    // TODO: Implement password reset API call here
-    console.log('Reset password for:', email);
-
-    // Simulate API call
-    setTimeout(() => {
+      // Simulate API call
+      setTimeout(() => {
+        setLoading(false);
+        alert('Password reset link sent to your email!');
+        setEmail(''); // Clear email after success
+      }, 2000);
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+      console.error('Error:', err);
       setLoading(false);
-      alert('Password reset link sent to your email!');
-    }, 2000);
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
   };
 
   return (
@@ -84,6 +95,20 @@ const ResetPassword = () => {
             Enter your email address to receive a link to reset your password.
           </Typography>
 
+          {error && (
+            <Typography
+              sx={{
+                color: 'error.main',
+                fontSize: '0.9rem',
+                mb: 1,
+                width: '100%',
+                textAlign: 'center',
+              }}
+            >
+              {error}
+            </Typography>
+          )}
+
           <InputBox
             id="reset-email"
             name="email"
@@ -91,6 +116,12 @@ const ResetPassword = () => {
             placeholder="Email"
             fullWidth
             icon={<EmailIcon />}
+            slotProps={{
+              input: {
+                value: email,
+                onChange: handleEmailChange,
+              },
+            }}
           />
 
           <A2ZButton
@@ -100,6 +131,7 @@ const ResetPassword = () => {
               width: '100%',
             }}
             loading={loading}
+            disabled={!email || loading}
           >
             Send Reset Link
           </A2ZButton>
