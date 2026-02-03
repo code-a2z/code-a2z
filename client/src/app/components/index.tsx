@@ -9,6 +9,9 @@ import { Routes } from 'react-router-dom';
 import getRoutesV1 from '../routes/auth-routes/v1';
 
 export const LoginLazyComponent = lazy(() => import('../../modules/auth/v1'));
+export const ResetPasswordLazyComponent = lazy(
+  () => import('../../modules/auth/v1/reset-password')
+);
 export const HomePageLazyComponent = lazy(
   () => import('../../modules/home/v1')
 );
