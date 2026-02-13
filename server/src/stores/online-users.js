@@ -1,7 +1,6 @@
 /**
  * In-memory store for online (chat) presence.
- * Keys: user_id (string), values: lastSeen (number timestamp).
- * When Socket.IO is added (sub-issue #1378), this can be replaced by Redis or socket-backed presence.
+ * Now integrated with Socket.IO for real-time presence tracking.
  */
 
 const PRESENCE_TTL_MS = 2 * 60 * 1000; // 2 minutes
@@ -33,4 +32,13 @@ export const getOnlineUserIds = () => {
     }
   }
   return ids;
+};
+
+/**
+ * Remove user from presence map (called on disconnect)
+ * @param {string} userId
+ */
+export const removePresence = (userId) => {
+  if (!userId) return;
+  presenceMap.delete(String(userId));
 };
