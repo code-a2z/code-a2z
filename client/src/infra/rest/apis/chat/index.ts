@@ -16,3 +16,7 @@ export const getOnlineUsers = async () => {
     true
   );
 };
+
+export const getChatUsers = async () => {
+  return get<undefined, ApiResponse<OnlineUser[]>>('/api/chat/users', true);
+};

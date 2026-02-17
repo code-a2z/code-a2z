@@ -8,38 +8,38 @@ import {
   useTheme,
   CircularProgress,
 } from '@mui/material';
-import { getOnlineUsers, reportPresence } from '../../../infra/rest/apis/chat';
+import { getChatUsers, reportPresence } from '../../../infra/rest/apis/chat';
 import { OnlineUser } from '../../../infra/rest/apis/chat/typing';
 import { CHATS_SIDEBAR_WIDTH, ONLINE_USERS_POLL_INTERVAL_MS, PRESENCE_REFRESH_INTERVAL_MS } from './constants';
 
 const Chats = () => {
   const theme = useTheme();
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [users, setUsers] = useState<OnlineUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<OnlineUser | null>(null);
 
-  const fetchPresenceAndOnlineUsers = useCallback(async () => {
+  const fetchPresenceAndUsers = useCallback(async () => {
     try {
       await reportPresence();
-      const res = await getOnlineUsers();
+      const res = await getChatUsers();
       if (res.status === 'success' && res.data) {
-        setOnlineUsers(res.data);
+        setUsers(res.data);
       }
     } catch {
-      setOnlineUsers([]);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchPresenceAndOnlineUsers();
-  }, [fetchPresenceAndOnlineUsers]);
+    fetchPresenceAndUsers();
+  }, [fetchPresenceAndUsers]);
 
   useEffect(() => {
-    const pollInterval = setInterval(fetchPresenceAndOnlineUsers, ONLINE_USERS_POLL_INTERVAL_MS);
+    const pollInterval = setInterval(fetchPresenceAndUsers, ONLINE_USERS_POLL_INTERVAL_MS);
     return () => clearInterval(pollInterval);
-  }, [fetchPresenceAndOnlineUsers]);
+  }, [fetchPresenceAndUsers]);
 
   useEffect(() => {
     const presenceInterval = setInterval(reportPresence, PRESENCE_REFRESH_INTERVAL_MS);
@@ -77,7 +77,7 @@ const Chats = () => {
             Chats
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Logged-in users
+            All registered users
           </Typography>
         </Box>
         <Box sx={{ flex: 1, overflow: 'auto' }}>
@@ -85,15 +85,15 @@ const Chats = () => {
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress size={32} />
             </Box>
-          ) : onlineUsers.length === 0 ? (
+          ) : users.length === 0 ? (
             <Box sx={{ px: 2, py: 4 }}>
               <Typography variant="body2" color="text.secondary" textAlign="center">
-                No other users online. Open this page in another browser or ask a friend to open the chat page.
+                No other users found. Ask a friend to create an account and open the chat page.
               </Typography>
             </Box>
           ) : (
             <List disablePadding>
-              {onlineUsers.map((user) => (
+              {users.map((user) => (
                 <ListItemButton
                   key={user._id}
                   selected={selectedUser?._id === user._id}
@@ -103,13 +103,28 @@ const Chats = () => {
                     py: 1.5,
                   }}
                 >
-                  <Avatar
-                    src={user.personal_info?.profile_img}
-                    alt={user.personal_info?.fullname}
-                    sx={{ width: 40, height: 40 }}
-                  >
-                    {(user.personal_info?.fullname?.[0] || user.personal_info?.username?.[0] || '?').toUpperCase()}
-                  </Avatar>
+                  <Box sx={{ position: 'relative', width: 40, height: 40 }}>
+                    <Avatar
+                      src={user.personal_info?.profile_img}
+                      alt={user.personal_info?.fullname}
+                      sx={{ width: 40, height: 40 }}
+                    >
+                      {(user.personal_info?.fullname?.[0] || user.personal_info?.username?.[0] || '?').toUpperCase()}
+                    </Avatar>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: -1,
+                        right: -1,
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        bgcolor: user.isOnline ? 'success.main' : 'background.paper',
+                        border: '2px solid',
+                        borderColor: user.isOnline ? 'background.paper' : 'text.disabled',
+                      }}
+                    />
+                  </Box>
                   <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Typography variant="body1" noWrap>
                       {user.personal_info?.fullname || user.personal_info?.username || 'Unknown'}
@@ -141,13 +156,28 @@ const Chats = () => {
           </Typography>
         ) : (
           <Box sx={{ textAlign: 'center', maxWidth: 360 }}>
-            <Avatar
-              src={selectedUser.personal_info?.profile_img}
-              alt={selectedUser.personal_info?.fullname}
-              sx={{ width: 64, height: 64, mx: 'auto', mb: 1.5 }}
-            >
-              {(selectedUser.personal_info?.fullname?.[0] || selectedUser.personal_info?.username?.[0] || '?').toUpperCase()}
-            </Avatar>
+            <Box sx={{ position: 'relative', width: 64, height: 64, mx: 'auto', mb: 1.5 }}>
+              <Avatar
+                src={selectedUser.personal_info?.profile_img}
+                alt={selectedUser.personal_info?.fullname}
+                sx={{ width: 64, height: 64 }}
+              >
+                {(selectedUser.personal_info?.fullname?.[0] || selectedUser.personal_info?.username?.[0] || '?').toUpperCase()}
+              </Avatar>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: -2,
+                  right: -2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  bgcolor: selectedUser.isOnline ? 'success.main' : 'background.paper',
+                  border: '2px solid',
+                  borderColor: selectedUser.isOnline ? 'background.paper' : 'text.disabled',
+                }}
+              />
+            </Box>
             <Typography variant="h6">
               Chat with {selectedUser.personal_info?.fullname || selectedUser.personal_info?.username || 'Unknown'}
             </Typography>
