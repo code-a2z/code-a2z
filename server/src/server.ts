@@ -41,7 +41,7 @@ server.use(sanitizeInput());
 connectDB();
 
 // Routes
-server.get('', (_req: Request, res: Response) =>
+server.get('/', (_req: Request, res: Response) =>
   res.status(200).json({ status: 'success', message: 'Backend is running...' })
 );
 
