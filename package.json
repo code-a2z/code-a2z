@@ -32,12 +32,12 @@
     "server": "cd server && npm run dev",
     "dev": "concurrently -n \"CLIENT,SERVER\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run client\" \"npm run server\"",
     "prepare": "husky",
-    "lint": "cd client && npx eslint src --ext .ts,.tsx && cd ../server && npx eslint src --ext .js && cd ..",
-    "lint:fix": "cd client && npx eslint src --ext .ts,.tsx --fix && cd ../server && npx eslint src --ext .js --fix && cd ..",
-    "format": "prettier --write \"client/src/**/*.{ts,tsx,js,jsx,css,html}\" \"server/**/*.js\" \"*.{json,md,yml,yaml}\"",
-    "format:check": "prettier --check \"client/src/**/*.{ts,tsx,js,jsx,css,html}\" \"server/**/*.js\" \"*.{json,md,yml,yaml}\"",
+    "lint": "cd client && npx eslint src --ext .ts,.tsx && cd ../server && npx eslint src --ext .ts && cd ..",
+    "lint:fix": "cd client && npx eslint src --ext .ts,.tsx --fix && cd ../server && npx eslint src --ext .ts --fix && cd ..",
+    "format": "prettier --write \"client/src/**/*.{ts,tsx,js,jsx,css,html}\" \"server/**/*.ts\" \"*.{json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"client/src/**/*.{ts,tsx,js,jsx,css,html}\" \"server/**/*.ts\" \"*.{json,md,yml,yaml}\"",
     "format:client": "prettier --write \"client/src/**/*.{ts,tsx,js,jsx,css,html}\"",
-    "format:server": "prettier --write \"server/**/*.js\"",
+    "format:server": "prettier --write \"server/**/*.ts\"",
     "format:docs": "prettier --write \"*.{json,md,yml,yaml}\"",
     "precommit-check": "npm run lint && npm run format:check",
     "docker:up": "docker-compose up -d",
@@ -74,7 +74,7 @@
       "prettier --write",
       "eslint --config client/eslint.config.js --fix"
     ],
-    "server/**/*.js": [
+    "server/**/*.ts": [
       "prettier --write",
       "eslint --fix"
     ],
