@@ -43,27 +43,31 @@ RESEND_API_KEY=<resend-api-key>
   "version": 2,
   "builds": [
     {
-      "src": "dist/index.js",
+      "src": "index.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/index.js"
+      "dest": "index.ts"
     }
   ]
 }
 ```
 
+**Note**: Vercel handles TypeScript compilation automatically. The configuration points to the source `index.ts` file, not the compiled output.
+
 ## Build Settings in Vercel
 
 1. **Framework Preset**: Other
 2. **Root Directory**: `server`
-3. **Build Command**: `npm run build`
-4. **Output Directory**: `dist`
+3. **Build Command**: Leave empty (Vercel auto-detects TypeScript)
+4. **Output Directory**: Leave empty
 5. **Install Command**: `npm install`
 6. **Node Version**: 18.x or higher
+
+**Important**: Vercel automatically compiles TypeScript. You don't need to run `npm run build` manually.
 
 ## Deployment Steps
 
