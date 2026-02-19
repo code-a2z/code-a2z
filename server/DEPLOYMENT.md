@@ -43,31 +43,34 @@ RESEND_API_KEY=<resend-api-key>
   "version": 2,
   "builds": [
     {
-      "src": "index.ts",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "index.ts"
+      "dest": "dist/index.js"
     }
   ]
 }
 ```
 
-**Note**: Vercel handles TypeScript compilation automatically. The configuration points to the source `index.ts` file, not the compiled output.
+**Note**: The configuration points to the compiled `dist/index.js` file. Vercel will automatically run `npm run build` before deployment to compile TypeScript to JavaScript.
 
 ## Build Settings in Vercel
 
 1. **Framework Preset**: Other
 2. **Root Directory**: `server`
-3. **Build Command**: Leave empty (Vercel auto-detects TypeScript)
-4. **Output Directory**: Leave empty
+3. **Build Command**: `npm run build` (auto-detected from package.json)
+4. **Output Directory**: Leave empty (dist is part of the build)
 5. **Install Command**: `npm install`
 6. **Node Version**: 18.x or higher
 
-**Important**: Vercel automatically compiles TypeScript. You don't need to run `npm run build` manually.
+**Important**: 
+- Vercel will automatically run `npm run build` which compiles TypeScript to the `dist/` folder
+- The serverless function serves the compiled JavaScript from `dist/index.js`
+- TypeScript is compiled to CommonJS for compatibility with Vercel's Node.js runtime
 
 ## Deployment Steps
 

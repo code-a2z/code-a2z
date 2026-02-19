@@ -8,7 +8,7 @@ Successfully migrated the entire Code A2Z backend from JavaScript to TypeScript 
 - **Lines of Code**: ~965 lines
 - **TypeScript Errors**: 0
 - **Build Time**: ~5 seconds
-- **Compilation Target**: ES2022
+- **Compilation Target**: ES2022 target, CommonJS modules
 
 ## What Changed
 
@@ -70,8 +70,10 @@ export default server;
 ## Technical Decisions
 
 ### Module System
-- **Kept ES Modules**: `"type": "module"` in package.json
-- **Import Extensions**: Removed `.js` extensions from imports (TypeScript handles this)
+- **Changed to CommonJS**: Removed `"type": "module"` from package.json
+- **Module Output**: TypeScript compiles to CommonJS (`module: "CommonJS"`)
+- **Reason**: Better compatibility with Vercel's serverless Node.js runtime
+- **Import Syntax**: Source code still uses ES6 imports (TypeScript transpiles to require())
 - **Export Pattern**: Maintained default exports
 
 ### TypeScript Configuration
@@ -79,7 +81,7 @@ export default server;
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "CommonJS",
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
@@ -87,6 +89,8 @@ export default server;
   }
 }
 ```
+
+**Note**: Changed from ES2022 modules to CommonJS for better compatibility with Vercel's serverless Node.js runtime.
 
 ### Type Safety Improvements
 1. **Environment Variables**: Typed with fallback defaults
