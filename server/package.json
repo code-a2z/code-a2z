@@ -18,12 +18,12 @@
     "npm": ">=8.0.0"
   },
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "build": "echo 'No build process required'",
+    "start": "node dist/index.js",
+    "dev": "tsx watch index.ts",
+    "build": "tsc",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
@@ -52,6 +52,19 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/hpp": "^0.2.7",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^25.3.0",
+    "@types/nodemailer": "^7.0.10",
+    "@types/sanitize-html": "^2.16.0",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
