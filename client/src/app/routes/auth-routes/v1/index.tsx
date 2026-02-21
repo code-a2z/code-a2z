@@ -3,6 +3,7 @@ import { Navigate, Route } from 'react-router-dom';
 import { ROUTES_V1 } from '../../constants/routes';
 import { LOADING } from '../../constants';
 import Loader from '../../../../shared/components/molecules/loader';
+import PermissionGuard from '../../../../shared/components/atoms/permission-guard';
 import {
   HomePageLazyComponent,
   ChatsPageLazyComponent,
@@ -26,27 +27,33 @@ export default function getRoutesV1() {
       key={`${ROUTES_V1.CHATS}/*`}
       path={`${ROUTES_V1.CHATS}/*`}
       element={
-        <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
-          <ChatsPageLazyComponent />
-        </Suspense>
+        <PermissionGuard feature="chats" action="read">
+          <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
+            <ChatsPageLazyComponent />
+          </Suspense>
+        </PermissionGuard>
       }
     />,
     <Route
       key={`${ROUTES_V1.NOTES}/*`}
       path={`${ROUTES_V1.NOTES}/*`}
       element={
-        <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
-          <NotesPageLazyComponent />
-        </Suspense>
+        <PermissionGuard feature="notes" action="read">
+          <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
+            <NotesPageLazyComponent />
+          </Suspense>
+        </PermissionGuard>
       }
     />,
     <Route
       key={`${ROUTES_V1.CODE}/*`}
       path={`${ROUTES_V1.CODE}/*`}
       element={
-        <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
-          <CodePageLazyComponent />
-        </Suspense>
+        <PermissionGuard feature="code" action="read">
+          <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
+            <CodePageLazyComponent />
+          </Suspense>
+        </PermissionGuard>
       }
     />,
     <Route

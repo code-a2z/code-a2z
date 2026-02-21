@@ -11,6 +11,7 @@ import {
   ROUTES_V1,
 } from '../../../../../app/routes/constants/routes';
 import { useAuth } from '../../../../hooks/use-auth';
+import { useHasPermission } from '../../../../hooks/use-has-permission';
 
 const logoutStyle = {
   marginTop: 'auto',
@@ -22,6 +23,9 @@ const useSidebar = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { logout } = useAuth();
+  const hasChats = useHasPermission('chats', 'read');
+  const hasNotes = useHasPermission('notes', 'read');
+  const hasCode = useHasPermission('code', 'read');
 
   // open modal
   const handleLogoutClick = useCallback(() => {
@@ -55,21 +59,21 @@ const useSidebar = () => {
         path: ROUTES_V1.CHATS,
         title: 'Chats',
         screenName: ROUTES_PAGE_V1.CHATS,
-        hasAccess: false,
+        hasAccess: hasChats,
       },
       {
         icon: NotesIcon,
         path: ROUTES_V1.NOTES,
         title: 'Notes',
         screenName: ROUTES_PAGE_V1.NOTES,
-        hasAccess: false,
+        hasAccess: hasNotes,
       },
       {
         icon: CodeIcon,
         path: ROUTES_V1.CODE,
         title: 'Code',
         screenName: ROUTES_PAGE_V1.CODE,
-        hasAccess: false,
+        hasAccess: hasCode,
       },
       {
         icon: SettingsIcon,
@@ -89,10 +93,10 @@ const useSidebar = () => {
     ];
 
     return {
-      items: items.filter(({ disable }) => !disable),
+      items: items.filter(item => !item.disable && item.hasAccess !== false),
       secondaryItems: secondaryItems.filter(({ disable }) => !disable),
     };
-  }, [handleLogoutClick]);
+  }, [handleLogoutClick, hasChats, hasNotes, hasCode]);
 
   return {
     showExpandedView,
