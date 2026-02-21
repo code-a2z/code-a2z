@@ -1,9 +1,10 @@
 import { Box, Typography, Card, CardActionArea } from '@mui/material';
-import { useAuth } from '../../../../shared/hooks/use-auth';
+import { useAuth } from '../../../shared/hooks/use-auth';
 import { ROUTES_V1 } from '../../../app/routes/constants/routes';
-import A2ZButton from '../../../../shared/components/atoms/button';
+import A2ZButton from '../../../shared/components/atoms/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import type { OrgListItem } from '../../../infra/states/org';
 
 export default function SelectOrgPage() {
   const { orgs, selectOrg, logout } = useAuth();
@@ -65,7 +66,7 @@ export default function SelectOrgPage() {
             maxWidth: 400,
           }}
         >
-          {orgs.map(({ org_id, name, role }) => (
+          {orgs.map(({ org_id, name, role }: OrgListItem) => (
             <Card key={org_id} variant="outlined">
               <CardActionArea
                 onClick={() => handleSelectOrg(org_id)}
