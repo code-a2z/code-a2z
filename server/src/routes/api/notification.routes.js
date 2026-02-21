@@ -1,6 +1,8 @@
 import express from 'express';
 
-import authenticateUser from '../../middlewares/auth.middleware.js';
+import authenticateUser, {
+  requireOrgScope,
+} from '../../middlewares/auth.middleware.js';
 
 import getNotifications from '../../controllers/notification/get-notifications.js';
 import notificationStatus from '../../controllers/notification/notification-status.js';
@@ -8,8 +10,23 @@ import allNotificationsCount from '../../controllers/notification/all-notificati
 
 const notificationRoutes = express.Router();
 
-notificationRoutes.get('/', authenticateUser, getNotifications);
-notificationRoutes.get('/status', authenticateUser, notificationStatus);
-notificationRoutes.get('/count', authenticateUser, allNotificationsCount);
+notificationRoutes.get(
+  '/',
+  authenticateUser,
+  requireOrgScope,
+  getNotifications
+);
+notificationRoutes.get(
+  '/status',
+  authenticateUser,
+  requireOrgScope,
+  notificationStatus
+);
+notificationRoutes.get(
+  '/count',
+  authenticateUser,
+  requireOrgScope,
+  allNotificationsCount
+);
 
 export default notificationRoutes;

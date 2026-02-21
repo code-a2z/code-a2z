@@ -1,6 +1,8 @@
 import express from 'express';
 
-import authenticateUser from '../../middlewares/auth.middleware.js';
+import authenticateUser, {
+  requireOrgScope,
+} from '../../middlewares/auth.middleware.js';
 
 import createProject from '../../controllers/project/create-project.js';
 import getAllProjects from '../../controllers/project/get-all-projects.js';
@@ -15,15 +17,25 @@ import deleteProject from '../../controllers/project/delete-project.js';
 
 const projectRoutes = express.Router();
 
-projectRoutes.post('/', authenticateUser, createProject);
+projectRoutes.post('/', authenticateUser, requireOrgScope, createProject);
 projectRoutes.get('/', getAllProjects);
 projectRoutes.get('/trending', trendingProjects);
 projectRoutes.get('/count', totalPublishedProjects);
 projectRoutes.get('/search', searchProjects);
 projectRoutes.get('/search/count', searchProjectsCount);
-projectRoutes.get('/user', authenticateUser, userProjects);
-projectRoutes.get('/user/count', authenticateUser, userProjectsCount);
+projectRoutes.get('/user', authenticateUser, requireOrgScope, userProjects);
+projectRoutes.get(
+  '/user/count',
+  authenticateUser,
+  requireOrgScope,
+  userProjectsCount
+);
 projectRoutes.get('/:project_id', getProject);
-projectRoutes.delete('/:project_id', authenticateUser, deleteProject);
+projectRoutes.delete(
+  '/:project_id',
+  authenticateUser,
+  requireOrgScope,
+  deleteProject
+);
 
 export default projectRoutes;

@@ -1,6 +1,8 @@
 import express from 'express';
 
-import authenticateUser from '../../middlewares/auth.middleware.js';
+import authenticateUser, {
+  requireOrgScope,
+} from '../../middlewares/auth.middleware.js';
 import upload from '../../middlewares/multer.middleware.js';
 
 import submitFeedback from '../../controllers/feedback/submit-feedback.js';
@@ -12,10 +14,11 @@ const feedbackRoutes = express.Router();
 feedbackRoutes.post(
   '/submit',
   authenticateUser,
+  requireOrgScope,
   upload.single('attachment'),
   submitFeedback
 );
 
-feedbackRoutes.get('/user', authenticateUser, getUserFeedback);
+feedbackRoutes.get('/user', authenticateUser, requireOrgScope, getUserFeedback);
 
 export default feedbackRoutes;

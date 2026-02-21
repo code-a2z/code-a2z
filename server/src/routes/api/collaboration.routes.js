@@ -1,6 +1,8 @@
 import express from 'express';
 
-import authenticateUser from '../../middlewares/auth.middleware.js';
+import authenticateUser, {
+  requireOrgScope,
+} from '../../middlewares/auth.middleware.js';
 
 import invitationToCollaborate from '../../controllers/collaboration/invite-collab.js';
 import acceptInvitation from '../../controllers/collaboration/accept-invite.js';
@@ -12,13 +14,25 @@ const collaborationRoutes = express.Router();
 collaborationRoutes.post(
   '/:project_id',
   authenticateUser,
+  requireOrgScope,
   invitationToCollaborate
 );
-collaborationRoutes.post('/accept/:token', authenticateUser, acceptInvitation);
-collaborationRoutes.post('/reject/:token', authenticateUser, rejectInvitation);
+collaborationRoutes.post(
+  '/accept/:token',
+  authenticateUser,
+  requireOrgScope,
+  acceptInvitation
+);
+collaborationRoutes.post(
+  '/reject/:token',
+  authenticateUser,
+  requireOrgScope,
+  rejectInvitation
+);
 collaborationRoutes.get(
   '/:project_id',
   authenticateUser,
+  requireOrgScope,
   getListOfCollaborators
 );
 

@@ -1,6 +1,8 @@
 import express from 'express';
 
-import authenticateUser from '../../middlewares/auth.middleware.js';
+import authenticateUser, {
+  requireOrgScope,
+} from '../../middlewares/auth.middleware.js';
 
 import createCollection from '../../controllers/collection/create-collection.js';
 import saveProject from '../../controllers/collection/save-project.js';
@@ -10,10 +12,30 @@ import deleteCollection from '../../controllers/collection/delete-collection.js'
 
 const collectionRoutes = express.Router();
 
-collectionRoutes.post('/', authenticateUser, createCollection);
-collectionRoutes.post('/save-project', authenticateUser, saveProject);
-collectionRoutes.get('/sort-projects', authenticateUser, sortProject);
-collectionRoutes.patch('/remove-project', authenticateUser, removeProject);
-collectionRoutes.delete('/:collection_id', authenticateUser, deleteCollection);
+collectionRoutes.post('/', authenticateUser, requireOrgScope, createCollection);
+collectionRoutes.post(
+  '/save-project',
+  authenticateUser,
+  requireOrgScope,
+  saveProject
+);
+collectionRoutes.get(
+  '/sort-projects',
+  authenticateUser,
+  requireOrgScope,
+  sortProject
+);
+collectionRoutes.patch(
+  '/remove-project',
+  authenticateUser,
+  requireOrgScope,
+  removeProject
+);
+collectionRoutes.delete(
+  '/:collection_id',
+  authenticateUser,
+  requireOrgScope,
+  deleteCollection
+);
 
 export default collectionRoutes;
