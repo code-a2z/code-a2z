@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { refreshToken } from '../../infra/rest/apis/auth';
-import { getAccessToken, setAccessToken } from './local';
+import { getAccessToken, setAccessToken, clearSelectedOrgId } from './local';
 
 let refreshPromise: Promise<boolean> | null = null;
 let isInterceptorSetup = false;
@@ -112,6 +112,21 @@ const setupAxiosInterceptor = () => {
         // If refresh failed, reject the request
         window.dispatchEvent(new CustomEvent('token-refresh-failed'));
         return Promise.reject(error);
+      }
+
+      // 403 Organization context required: token is pre-org or org scope lost; send user to org selection
+      if (error.response?.status === 403) {
+        const message =
+          (error.response?.data as { message?: string })?.message ?? '';
+        const isOrgRequired =
+          message.includes('Organization context required') ||
+          message.includes('org required') ||
+          message.includes('select-org');
+        if (isOrgRequired) {
+          clearSelectedOrgId();
+          window.dispatchEvent(new CustomEvent('org-context-required'));
+          return Promise.reject(error);
+        }
       }
 
       return Promise.reject(error);
