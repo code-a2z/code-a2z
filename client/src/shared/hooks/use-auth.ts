@@ -92,7 +92,27 @@ export const useAuth = () => {
         return;
       }
 
+      // Reload with persisted org: refresh first to get pre-org token, then select-org
       try {
+        const refreshResponse = await refreshToken();
+        if (
+          refreshResponse.status !== 'success' ||
+          !refreshResponse?.data?.access_token
+        ) {
+          clearToken();
+          clearSelectedOrgId();
+          setSelectedOrgIdState(null);
+          setPermissions([]);
+          setOrgFeatures([]);
+          setOrg(null);
+          if (storedOrgs?.length) setOrgsState(storedOrgs);
+          setInitialized(true);
+          return;
+        }
+        const newToken = refreshResponse.data.access_token;
+        setAccessToken(newToken);
+        setToken(newToken);
+
         const response = await selectOrgApi({ org_id: storedOrgId });
         if (response.status === 'success' && response.data) {
           const d = response.data;
@@ -172,6 +192,42 @@ export const useAuth = () => {
     },
     [setToken]
   );
+
+  /**
+   * Switch organization: refresh to get pre-org token, clear org context.
+   * Returns true if caller should navigate to /select-org; false if refresh failed and user was logged out.
+   */
+  const switchOrg = useCallback(async (): Promise<boolean> => {
+    try {
+      const refreshResponse = await refreshToken();
+      if (
+        refreshResponse.status !== 'success' ||
+        !refreshResponse?.data?.access_token
+      ) {
+        logout();
+        return false;
+      }
+      const newToken = refreshResponse.data.access_token;
+      setAccessToken(newToken);
+      setToken(newToken);
+      clearSelectedOrgId();
+      setSelectedOrgIdState(null);
+      setPermissions([]);
+      setOrgFeatures([]);
+      setOrg(null);
+      return true;
+    } catch {
+      logout();
+      return false;
+    }
+  }, [
+    setToken,
+    setSelectedOrgIdState,
+    setPermissions,
+    setOrgFeatures,
+    setOrg,
+    logout,
+  ]);
 
   /** Call after login/signup success: persist orgs and clear selectedOrgId so user sees org picker. */
   const setOrgsFromLogin = useCallback(
@@ -330,5 +386,6 @@ export const useAuth = () => {
     orgs,
     setOrgsFromLogin,
     selectOrg,
+    switchOrg,
   };
 };
