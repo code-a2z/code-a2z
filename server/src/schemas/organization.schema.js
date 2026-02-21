@@ -38,7 +38,4 @@ const ORGANIZATION_SCHEMA = Schema(
   }
 );
 
-// Compound index for slug lookups (unique already creates an index)
-ORGANIZATION_SCHEMA.index({ slug: 1 });
-
 export default ORGANIZATION_SCHEMA;
