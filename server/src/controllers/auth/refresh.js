@@ -1,16 +1,13 @@
 /**
- * POST /api/auth/refresh - Refresh access token using refresh token
- * @returns {Object} Success message with new access token
+ * POST /api/auth/refresh - Refresh access token using refresh token (cookie).
+ * Always issues a pre-org access token. Client must call select-org again to get org-scoped token.
  */
 
 import jwt from 'jsonwebtoken';
 import { sendResponse } from '../../utils/response.js';
 import { COOKIE_TOKEN } from '../../typings/index.js';
-import {
-  JWT_SECRET_ACCESS_KEY,
-  JWT_SECRET_REFRESH_KEY,
-  JWT_ACCESS_EXPIRES_IN,
-} from '../../config/env.js';
+import { JWT_SECRET_REFRESH_KEY } from '../../config/env.js';
+import { generateTokens } from './utils/index.js';
 
 const refresh = async (req, res) => {
   try {
@@ -20,7 +17,6 @@ const refresh = async (req, res) => {
       return sendResponse(res, 401, 'No refresh token provided');
     }
 
-    // Verify the refresh token
     jwt.verify(refresh_token, JWT_SECRET_REFRESH_KEY, (err, decoded) => {
       if (err) {
         return sendResponse(res, 401, 'Invalid or expired refresh token');
@@ -29,15 +25,13 @@ const refresh = async (req, res) => {
       const payload = {
         user_id: decoded.user_id,
         subscriber_id: decoded.subscriber_id,
+        ...(decoded.email && { email: decoded.email }),
       };
 
-      // Generate a new access token
-      const new_access_token = jwt.sign(payload, JWT_SECRET_ACCESS_KEY, {
-        expiresIn: JWT_ACCESS_EXPIRES_IN,
-      });
+      const { access_token } = generateTokens(payload);
 
       return sendResponse(res, 200, 'Access token refreshed successfully', {
-        access_token: new_access_token,
+        access_token,
       });
     });
   } catch (err) {
