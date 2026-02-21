@@ -16,6 +16,7 @@ import notificationRoutes from './api/notification.routes.js';
 import collectionRoutes from './api/collections.routes.js';
 import collaborationRoutes from './api/collaboration.routes.js';
 import feedbackRoutes from './api/feedback.routes.js';
+import chatRoutes from './api/chat.routes.js';
 
 const router = express.Router();
 
@@ -30,5 +31,6 @@ router.use('/notification', generalLimiter, notificationRoutes);
 router.use('/collection', generalLimiter, collectionRoutes);
 router.use('/collaboration', generalLimiter, collaborationRoutes);
 router.use('/feedback', generalLimiter, feedbackRoutes);
+router.use('/chat', generalLimiter, chatRoutes);
 
 export default router;

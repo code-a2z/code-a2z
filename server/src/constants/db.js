@@ -7,4 +7,5 @@ export const COLLECTION_NAMES = {
   COLLABORATION: 'collaborations',
   COLLECTIONS: 'collections',
   FEEDBACK: 'feedbacks',
+  MESSAGES: 'messages',
 };
