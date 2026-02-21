@@ -13,7 +13,7 @@ import { EMAIL_REGEX, PASSWORD_REGEX } from '../../utils/regex.js';
 import { SALT_ROUNDS } from '../../constants/index.js';
 import { COOKIE_TOKEN, NODE_ENV } from '../../typings/index.js';
 import { sendResponse } from '../../utils/response.js';
-import { generateTokens, generateUsername } from './utils/index.js';
+import { generatePreOrgToken, generateUsername } from './utils/index.js';
 import { JWT_REFRESH_EXPIRES_IN_NUM, SERVER_ENV } from '../../config/env.js';
 
 const signup = async (req, res) => {
@@ -79,9 +79,10 @@ const signup = async (req, res) => {
     const payload = {
       user_id: saved_user._id,
       subscriber_id: subscriber._id,
+      email: subscriber.email,
     };
 
-    const { access_token, refresh_token } = generateTokens(payload);
+    const { access_token, refresh_token } = generatePreOrgToken(payload);
     res.cookie(COOKIE_TOKEN.REFRESH_TOKEN, refresh_token, {
       httpOnly: true,
       secure: SERVER_ENV === NODE_ENV.PRODUCTION,
@@ -90,8 +91,17 @@ const signup = async (req, res) => {
       maxAge: JWT_REFRESH_EXPIRES_IN_NUM,
     });
 
+    const limitedUser = {
+      id: saved_user._id,
+      fullname: saved_user.personal_info?.fullname,
+      username: saved_user.personal_info?.username,
+      email: subscriber.email,
+      profile_img: saved_user.personal_info?.profile_img,
+    };
+
     return sendResponse(res, 201, 'User registered successfully', {
-      user: saved_user,
+      user: limitedUser,
+      orgs: [],
       access_token,
     });
   } catch (err) {
