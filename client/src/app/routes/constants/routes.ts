@@ -1,6 +1,9 @@
 /** Route for org selection (token present, no selectedOrgId). */
 export const ROUTE_SELECT_ORG = '/select-org';
 
+/** Public route to accept org invite (token in query). */
+export const ROUTE_ACCEPT_INVITE = '/accept-invite';
+
 export enum ROUTES_PAGE_V1 {
   HOME = 'home',
   CHATS = 'chats',
@@ -28,6 +31,7 @@ export enum ROUTES_SETTINGS_V1 {
   NOTIFICATION = '/notification',
   MANAGE_ARTICLES = '/manage-articles',
   INTEGRATIONS = '/integrations',
+  TEAM = '/team',
 }
 
 export enum ROUTES_SETTINGS_INTEGRATIONS_V1 {

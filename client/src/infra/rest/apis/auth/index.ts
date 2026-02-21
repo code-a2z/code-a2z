@@ -1,4 +1,4 @@
-import { patch, post } from '../..';
+import { get, patch, post } from '../..';
 import { ApiResponse, BaseApiResponse } from '../../typings';
 import {
   signUpPayload,
@@ -7,6 +7,9 @@ import {
   LoginSignupResponseData,
   selectOrgPayload,
   SelectOrgResponseData,
+  AcceptInviteInfoResponseData,
+  AcceptInvitePayload,
+  AcceptInviteResponseData,
 } from './typing';
 
 export const signUp = async (payload: signUpPayload) => {
@@ -51,5 +54,20 @@ export const changePassword = async (
     `/api/auth/change-password`,
     true,
     changePasswordPayload
+  );
+};
+
+export const getAcceptInviteInfo = async (token: string) => {
+  return get<undefined, ApiResponse<AcceptInviteInfoResponseData>>(
+    `/api/auth/accept-invite?token=${encodeURIComponent(token)}`,
+    false
+  );
+};
+
+export const postAcceptInvite = async (payload: AcceptInvitePayload) => {
+  return post<AcceptInvitePayload, ApiResponse<AcceptInviteResponseData>>(
+    '/api/auth/accept-invite',
+    false,
+    payload
   );
 };
