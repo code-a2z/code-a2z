@@ -1,20 +1,36 @@
 import { patch, post } from '../..';
-import { USER_DB_STATE } from '../../typings';
 import { ApiResponse, BaseApiResponse } from '../../typings';
-import { signUpPayload, loginPayload, changePasswordPayload } from './typing';
+import {
+  signUpPayload,
+  loginPayload,
+  changePasswordPayload,
+  LoginSignupResponseData,
+  selectOrgPayload,
+  SelectOrgResponseData,
+} from './typing';
 
-export const signUp = async (signUpPayload: signUpPayload) => {
-  return post<
-    signUpPayload,
-    ApiResponse<{ user: USER_DB_STATE; access_token: string }>
-  >('/api/auth/signup', false, signUpPayload);
+export const signUp = async (payload: signUpPayload) => {
+  return post<signUpPayload, ApiResponse<LoginSignupResponseData>>(
+    '/api/auth/signup',
+    false,
+    payload
+  );
 };
 
-export const login = async (loginPayload: loginPayload) => {
-  return post<
-    loginPayload,
-    ApiResponse<{ user: USER_DB_STATE; access_token: string }>
-  >('/api/auth/login', false, loginPayload);
+export const login = async (payload: loginPayload) => {
+  return post<loginPayload, ApiResponse<LoginSignupResponseData>>(
+    '/api/auth/login',
+    false,
+    payload
+  );
+};
+
+export const selectOrg = async (payload: selectOrgPayload) => {
+  return post<selectOrgPayload, ApiResponse<SelectOrgResponseData>>(
+    '/api/auth/select-org',
+    true,
+    payload
+  );
 };
 
 export const refreshToken = async () => {
