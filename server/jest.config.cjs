@@ -2,10 +2,10 @@
 module.exports = {
   testEnvironment: 'node',
   transform: {},
-  extensionsToTreatAsEsm: ['.js'],
   testMatch: ['**/__tests__/**/*.test.js', '**/*.test.js'],
   testPathIgnorePatterns: ['/node_modules/'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testTimeout: 20000,
   verbose: true,
+  forceExit: true,
 };

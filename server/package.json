@@ -20,7 +20,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules MONGODB_URL=mongodb://localhost:27017/code_a2z_test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test": "MONGODB_URL=mongodb://localhost:27017/code_a2z_test node --test src/__tests__/api.test.js",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed:default-org": "node src/db/seed-default-org.js",
