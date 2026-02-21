@@ -14,13 +14,17 @@ import { getPermissionsForRole } from '../../constants/rbac.js';
 
 /**
  * Filter permissions to only those for features enabled in the org.
- * Permission format: "feature:action" (e.g. "articles:read").
+ * Permission format: "feature:action" (e.g. "articles:read"). Org-level
+ * permissions (org:manage_members, org:manage_billing, org:manage) are always
+ * kept and not gated by enabled_features.
  */
 function filterPermissionsByOrgFeatures(permissions, enabledFeatures) {
   const featureSet = new Set(enabledFeatures || []);
   return permissions.filter(perm => {
     const feature = typeof perm === 'string' ? perm.split(':')[0] : null;
-    return feature && featureSet.has(feature);
+    if (!feature) return false;
+    if (feature === 'org') return true;
+    return featureSet.has(feature);
   });
 }
 
