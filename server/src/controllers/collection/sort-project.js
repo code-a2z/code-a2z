@@ -11,6 +11,10 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const sortProject = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const collection_id = req.query.collection_id;
@@ -20,8 +24,12 @@ const sortProject = async (req, res) => {
       return sendResponse(res, 400, 'Invalid or missing collection_id');
     }
 
-    // Fetch the collection for this user
-    const collection = await COLLECTION.findOne({ user_id, _id: collection_id })
+    // Fetch the collection for this user in this org
+    const collection = await COLLECTION.findOne({
+      user_id,
+      org_id,
+      _id: collection_id,
+    })
       .select('project_ids')
       .lean();
 
@@ -42,8 +50,11 @@ const sortProject = async (req, res) => {
     };
     const sortCriteria = sortOptions[sort_by] || sortOptions.newest;
 
-    // Fetch projects with sorting and populate author
-    const projects = await PROJECT.find({ _id: { $in: projectIds } })
+    // Fetch projects (same org) with sorting and populate author
+    const projects = await PROJECT.find({
+      _id: { $in: projectIds },
+      org_id,
+    })
       .sort(sortCriteria)
       .populate(
         'user_id',

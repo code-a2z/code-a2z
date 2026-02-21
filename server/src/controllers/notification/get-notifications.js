@@ -11,13 +11,21 @@ import { NOTIFICATION_TYPES } from '../../typings/index.js';
 import { sendResponse } from '../../utils/response.js';
 
 const getNotifications = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const user_id = req.user.user_id;
   const page = parseInt(req.query.page) || 1;
   const filter = req.query.filter || NOTIFICATION_TYPES.ALL;
   const deletedDocCount = parseInt(req.query.deletedDocCount) || 0;
   const maxLimit = 10;
 
-  const findQuery = { author_id: user_id, user_id: { $ne: user_id } };
+  const findQuery = {
+    author_id: user_id,
+    org_id,
+    user_id: { $ne: user_id },
+  };
   if (filter !== NOTIFICATION_TYPES.ALL) {
     findQuery.type = filter;
   }

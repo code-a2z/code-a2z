@@ -9,6 +9,10 @@ import COLLECTION from '../../models/collection.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const deleteCollection = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const { collection_id } = req.params;
@@ -19,6 +23,7 @@ const deleteCollection = async (req, res) => {
 
     const deleted_collection = await COLLECTION.findOneAndDelete({
       user_id,
+      org_id,
       _id: collection_id,
     });
 

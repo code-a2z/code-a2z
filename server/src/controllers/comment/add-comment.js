@@ -14,6 +14,10 @@ import { sendResponse } from '../../utils/response.js';
 import { NOTIFICATION_TYPES } from '../../typings/index.js';
 
 const addComment = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const user_id = req.user.user_id;
   const { project_id, comment, replying_to, notification_id } = req.body;
 
@@ -22,9 +26,12 @@ const addComment = async (req, res) => {
   }
 
   try {
-    const project = await PROJECT.findById(project_id).select('user_id');
+    const project = await PROJECT.findById(project_id).select('user_id org_id');
     if (!project) {
       return sendResponse(res, 404, 'Project not found');
+    }
+    if (project.org_id?.toString() !== org_id?.toString()) {
+      return sendResponse(res, 403, 'Project not in your organization');
     }
 
     const project_author = project.user_id;
@@ -70,7 +77,7 @@ const addComment = async (req, res) => {
       }
     }
 
-    // Prepare notification
+    // Prepare notification (org-scoped)
     const notificationObj = new NOTIFICATION({
       type: replying_to ? NOTIFICATION_TYPES.REPLY : NOTIFICATION_TYPES.COMMENT,
       project_id,
@@ -78,6 +85,7 @@ const addComment = async (req, res) => {
       author_id: replying_to ? parentComment?.user_id : project_author,
       comment_id: commentDoc._id,
       replied_on_comment_id: replying_to || undefined,
+      org_id: project.org_id,
     });
 
     await notificationObj.save();
