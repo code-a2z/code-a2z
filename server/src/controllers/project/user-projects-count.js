@@ -9,6 +9,10 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const userProjectsCount = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const user_id = req.user.user_id;
   const { is_draft, query = '' } = req.query;
   const titleFilter = new RegExp(query, 'i');
@@ -16,6 +20,7 @@ const userProjectsCount = async (req, res) => {
   try {
     const totalDocs = await PROJECT.countDocuments({
       user_id,
+      org_id,
       is_draft: is_draft === 'true' || is_draft === true,
       title: titleFilter,
     });

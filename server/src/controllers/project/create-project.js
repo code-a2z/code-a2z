@@ -18,6 +18,10 @@ import { sendResponse } from '../../utils/response.js';
 
 const createProject = async (req, res) => {
   const user_id = req.user.user_id;
+  const org_id = req.user.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   let {
     title,
     banner_url,
@@ -70,9 +74,9 @@ const createProject = async (req, res) => {
 
   try {
     if (project_id) {
-      // Update existing project
+      // Update existing project (must belong to current org)
       const updated_project = await PROJECT.findOneAndUpdate(
-        { _id: project_id },
+        { _id: project_id, org_id },
         {
           title,
           banner_url,
@@ -81,7 +85,7 @@ const createProject = async (req, res) => {
           live_url,
           tags,
           content_blocks,
-          draft: is_draft === 'true' || is_draft === true,
+          is_draft: is_draft === 'true' || is_draft === true,
         },
         { new: true }
       );
@@ -92,7 +96,7 @@ const createProject = async (req, res) => {
         id: project_id,
       });
     } else {
-      // Create new project
+      // Create new project (org-scoped)
       const project = new PROJECT({
         title,
         banner_url,
@@ -102,7 +106,8 @@ const createProject = async (req, res) => {
         tags,
         content_blocks,
         user_id,
-        draft: is_draft === 'true' || is_draft === true,
+        org_id,
+        is_draft: is_draft === 'true' || is_draft === true,
       });
 
       const saved_project = await project.save();

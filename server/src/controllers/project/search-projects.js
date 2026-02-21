@@ -13,6 +13,10 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const searchProjects = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const {
     tag,
     query,
@@ -22,7 +26,7 @@ const searchProjects = async (req, res) => {
     rmv_project_by_id,
   } = req.query;
 
-  const findQuery = { is_draft: false };
+  const findQuery = { is_draft: false, org_id };
   if (tag && tag !== 'undefined') {
     findQuery.tags = tag;
     if (rmv_project_by_id) findQuery._id = { $ne: rmv_project_by_id };

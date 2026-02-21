@@ -11,6 +11,10 @@ import { PROJECT_PERMISSION_MODES } from '../../typings/index.js';
 import { sendResponse } from '../../utils/response.js';
 
 const getProject = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const { project_id } = req.params;
   const { mode } = req.query; // mode can be 'edit' or 'read' & removed 'is_draft = false' boolean param
   const increment_val = mode !== PROJECT_PERMISSION_MODES.EDIT ? 1 : 0;
@@ -20,7 +24,7 @@ const getProject = async (req, res) => {
 
   try {
     const project = await PROJECT.findOneAndUpdate(
-      { _id: project_id },
+      { _id: project_id, org_id },
       { $inc: { 'activity.total_reads': increment_val } },
       { new: true }
     )

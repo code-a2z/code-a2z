@@ -7,8 +7,12 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const trendingProjects = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
-    const projects = await PROJECT.find({ is_draft: false })
+    const projects = await PROJECT.find({ is_draft: false, org_id })
       .populate(
         'user_id',
         'personal_info.profile_img personal_info.username personal_info.fullname -_id'

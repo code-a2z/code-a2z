@@ -8,13 +8,17 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const getAllProjects = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   let page = req.query.page || 1;
   const maxLimit = 10;
 
   if (page < 1) page = 1;
 
   try {
-    const projects = await PROJECT.find({ is_draft: false })
+    const projects = await PROJECT.find({ is_draft: false, org_id })
       .populate({
         path: 'user_id',
         select:

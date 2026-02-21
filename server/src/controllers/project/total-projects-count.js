@@ -7,8 +7,12 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const totalPublishedProjects = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
-    const count = await PROJECT.countDocuments({ is_draft: false });
+    const count = await PROJECT.countDocuments({ is_draft: false, org_id });
     return sendResponse(res, 200, 'Total projects count fetched successfully', {
       totalDocs: count,
     });
