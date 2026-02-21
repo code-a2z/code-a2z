@@ -32,7 +32,5 @@ const ORGANIZATION_MEMBER_SCHEMA = Schema(
 
 // One membership per user per org (prevents duplicate joins and auth loopholes)
 ORGANIZATION_MEMBER_SCHEMA.index({ user_id: 1, org_id: 1 }, { unique: true });
-// List members of an org
-ORGANIZATION_MEMBER_SCHEMA.index({ org_id: 1 });
 
 export default ORGANIZATION_MEMBER_SCHEMA;
