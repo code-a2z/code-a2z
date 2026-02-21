@@ -13,3 +13,4 @@ export const ManageArticlesLazyComponentV1 = lazy(
 export const NotificationLazyComponentV1 = lazy(
   () => import('./notification/v1')
 );
+export const TeamLazyComponentV1 = lazy(() => import('./team/v1'));
