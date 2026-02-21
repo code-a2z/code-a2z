@@ -60,6 +60,14 @@ const login = async (req, res) => {
         role: m.role,
       }));
 
+    if (orgs.length === 0) {
+      return sendResponse(
+        res,
+        403,
+        'You are not a member of any organization. Ask an admin to invite you by email.'
+      );
+    }
+
     const payload = {
       user_id: user._id,
       subscriber_id: subscriber._id,

@@ -128,23 +128,52 @@ describe('API suite (auth order then in-org)', () => {
         .expect(401);
       assert.strictEqual(res.body.status, 'error');
     });
+
+    it('POST /api/auth/login when user has no org returns 403, no token', async () => {
+      const noOrgEmail = `no-org-${Date.now()}@example.com`;
+      const sub = await SUBSCRIBER.create({
+        email: noOrgEmail,
+        is_subscribed: true,
+        subscribed_at: new Date(),
+      });
+      const hashed = await bcrypt.hash('Test123', SALT_ROUNDS);
+      const u = await USER.create({
+        personal_info: {
+          fullname: 'No Org User',
+          subscriber_id: sub._id,
+          password: hashed,
+          username: 'noorg' + Date.now().toString(36),
+        },
+      });
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: noOrgEmail, password: 'Test123' })
+        .expect(403);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(
+        res.body.message,
+        /not a member of any organization|invite you by email/i
+      );
+      assert.ok(!res.body.data?.access_token);
+      assert.strictEqual(res.headers['set-cookie'], undefined);
+      await USER.deleteOne({ _id: u._id });
+      await SUBSCRIBER.deleteOne({ _id: sub._id });
+    });
   });
 
-  describe('3. Auth: signup and refresh', () => {
-    it('POST /api/auth/signup with valid body returns 201', async () => {
-      const email = `signup-${Date.now()}@example.com`;
+  describe('3. Auth: signup disabled (invite-only) and refresh', () => {
+    it('POST /api/auth/signup returns 403 (signup disabled)', async () => {
       const res = await request(app)
         .post('/api/auth/signup')
         .send({
           fullname: 'Signup Test',
-          email,
+          email: `signup-${Date.now()}@example.com`,
           password: 'Test123',
         })
-        .expect(201);
-      assert.strictEqual(res.body.status, 'success');
-      assert.ok(res.body.data.access_token);
-      assert.ok(res.body.data.user);
-      assert.deepStrictEqual(res.body.data.orgs, []);
+        .expect(403);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /Signup is disabled|invite you by email/i);
+      assert.ok(!res.body.data?.access_token);
     });
 
     it('POST /api/auth/refresh with cookie returns pre-org token', async () => {
