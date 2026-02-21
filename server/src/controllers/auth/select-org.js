@@ -4,6 +4,7 @@
  * org-scoped access token with role, permissions (filtered by org enabled_features), and org_features.
  */
 
+import mongoose from 'mongoose';
 import ORGANIZATION_MEMBER from '../../models/organization-member.model.js';
 import USER from '../../models/user.model.js';
 import SUBSCRIBER from '../../models/subscriber.model.js';
@@ -28,6 +29,10 @@ const selectOrg = async (req, res) => {
 
   if (!org_id) {
     return sendResponse(res, 400, 'org_id is required');
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(org_id)) {
+    return sendResponse(res, 400, 'org_id must be a valid MongoDB ObjectId');
   }
 
   const userId = req.user?.user_id;
