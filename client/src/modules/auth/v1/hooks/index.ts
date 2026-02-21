@@ -2,19 +2,19 @@ import { FormEvent, useState } from 'react';
 import { emailRegex, passwordRegex } from '../../../../shared/utils/regex';
 import { useNotifications } from '../../../../shared/hooks/use-notification';
 import { login, signUp } from '../../../../infra/rest/apis/auth';
+import { useAuth } from '../../../../shared/hooks/use-auth';
 import { useSetAtom } from 'jotai';
 import { UserAtom } from '../../../../infra/states/user';
-import { useSetAtom as useSetAtomGeneric } from 'jotai';
-import { TokenAtom } from '../../../../infra/states/auth';
 import { setAccessToken } from '../../../../shared/utils/local';
 import { ErrorResponse } from '../../../../infra/rest/typings';
 import { useNavigate } from 'react-router-dom';
+import { ROUTE_SELECT_ORG } from '../../../../app/routes/constants/routes';
 
 export const useUserAuthForm = ({ type }: { type: string }) => {
   const { addNotification } = useNotifications();
-  const [loading, setLoading] = useState<boolean>(false);
+  const { login: authLogin, setOrgsFromLogin } = useAuth();
   const setUser = useSetAtom(UserAtom);
-  const setToken = useSetAtomGeneric(TokenAtom);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -75,11 +75,46 @@ export const useUserAuthForm = ({ type }: { type: string }) => {
         message: response.message,
         type: response.status,
       });
-      if (response.status === 'success') {
-        setUser(response.data?.user ?? null);
-        setAccessToken(response.data?.access_token || '');
-        setToken(response.data?.access_token || null);
-        navigate('/');
+      if (response.status === 'success' && response.data) {
+        const {
+          user: userData,
+          orgs: orgsList,
+          access_token: accessToken,
+        } = response.data;
+        setUser(
+          userData
+            ? {
+                _id: userData.id,
+                personal_info: {
+                  fullname: userData.fullname ?? '',
+                  username: userData.username ?? '',
+                  profile_img: userData.profile_img ?? '',
+                  subscriber_id: '',
+                  bio: '',
+                },
+                social_links: {
+                  youtube: '',
+                  instagram: '',
+                  facebook: '',
+                  x: '',
+                  github: '',
+                  linkedin: '',
+                  website: '',
+                },
+                account_info: { total_posts: 0, total_reads: 0 },
+                role: '',
+                project_ids: [],
+                collaborated_projects_ids: [],
+                collections_ids: [],
+                joinedAt: '',
+                updatedAt: '',
+              }
+            : null
+        );
+        setAccessToken(accessToken || '');
+        authLogin(accessToken || '');
+        setOrgsFromLogin(orgsList ?? []);
+        navigate(ROUTE_SELECT_ORG);
       }
     } catch (error) {
       console.error('Error in form submission:', error);
