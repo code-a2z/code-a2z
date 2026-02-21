@@ -49,8 +49,8 @@ export default function SelectOrgPage() {
       {orgs.length === 0 ? (
         <Box sx={{ textAlign: 'center', maxWidth: 400 }}>
           <Typography color="text.secondary" sx={{ mb: 2 }}>
-            You are not in any organization yet. Ask an admin to add you, or log
-            out to use another account.
+            Ask an admin to invite you by email. You can log out to use another
+            account.
           </Typography>
           <A2ZButton variant="outlined" onClick={() => logout()}>
             Log out
