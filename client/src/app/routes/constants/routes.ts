@@ -1,3 +1,6 @@
+/** Route for org selection (token present, no selectedOrgId). */
+export const ROUTE_SELECT_ORG = '/select-org';
+
 export enum ROUTES_PAGE_V1 {
   HOME = 'home',
   CHATS = 'chats',
