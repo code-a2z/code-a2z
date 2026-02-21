@@ -8,4 +8,6 @@ export const COLLECTION_NAMES = {
   COLLECTIONS: 'collections',
   FEEDBACK: 'feedbacks',
   MESSAGES: 'messages',
+  ORGANIZATIONS: 'organizations',
+  ORGANIZATION_MEMBERS: 'organization_members',
 };
