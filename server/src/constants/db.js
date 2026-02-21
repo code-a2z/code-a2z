@@ -10,4 +10,5 @@ export const COLLECTION_NAMES = {
   MESSAGES: 'messages',
   ORGANIZATIONS: 'organizations',
   ORGANIZATION_MEMBERS: 'organization_members',
+  ORGANIZATION_INVITES: 'organization_invites',
 };
