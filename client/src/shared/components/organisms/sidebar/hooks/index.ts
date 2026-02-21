@@ -1,14 +1,17 @@
 import { useCallback, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import ChatIcon from '@mui/icons-material/Chat';
 import NotesIcon from '@mui/icons-material/Notes';
 import CodeIcon from '@mui/icons-material/Code';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { SideBarItemsType } from '../typings';
 import {
   ROUTES_PAGE_V1,
   ROUTES_V1,
+  ROUTE_SELECT_ORG,
 } from '../../../../../app/routes/constants/routes';
 import { useAuth } from '../../../../hooks/use-auth';
 import { useHasPermission } from '../../../../hooks/use-has-permission';
@@ -21,11 +24,19 @@ const logoutStyle = {
 const useSidebar = () => {
   const [showExpandedView, setShowExpandedView] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
 
-  const { logout } = useAuth();
+  const { logout, switchOrg } = useAuth();
   const hasChats = useHasPermission('chats', 'read');
   const hasNotes = useHasPermission('notes', 'read');
   const hasCode = useHasPermission('code', 'read');
+
+  const handleSwitchOrg = useCallback(async () => {
+    const switched = await switchOrg();
+    if (switched) {
+      navigate(ROUTE_SELECT_ORG, { replace: true });
+    }
+  }, [switchOrg, navigate]);
 
   // open modal
   const handleLogoutClick = useCallback(() => {
@@ -85,6 +96,13 @@ const useSidebar = () => {
 
     const secondaryItems: SideBarItemsType[] = [
       {
+        icon: SwapHorizIcon,
+        onClick: () => {
+          void handleSwitchOrg();
+        },
+        title: 'Switch organization',
+      },
+      {
         icon: PowerSettingsNewIcon,
         onClick: handleLogoutClick,
         title: 'Logout',
@@ -96,7 +114,7 @@ const useSidebar = () => {
       items: items.filter(item => !item.disable && item.hasAccess !== false),
       secondaryItems: secondaryItems.filter(({ disable }) => !disable),
     };
-  }, [handleLogoutClick, hasChats, hasNotes, hasCode]);
+  }, [handleLogoutClick, handleSwitchOrg, hasChats, hasNotes, hasCode]);
 
   return {
     showExpandedView,
