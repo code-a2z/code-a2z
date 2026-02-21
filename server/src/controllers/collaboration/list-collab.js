@@ -5,15 +5,25 @@
  */
 
 import COLLABORATION from '../../models/collaboration.model.js';
+import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const getListOfCollaborators = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
-    const user_id = req.user;
+    const user_id = req.user.user_id;
     const { project_id } = req.params;
 
     if (!project_id) {
       return sendResponse(res, 400, 'Project ID is required');
+    }
+
+    const projectInOrg = await PROJECT.exists({ _id: project_id, org_id });
+    if (!projectInOrg) {
+      return sendResponse(res, 404, 'Project not found');
     }
 
     const collaborators = await COLLABORATION.find({

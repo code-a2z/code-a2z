@@ -5,15 +5,19 @@
  */
 
 import COLLABORATION from '../../models/collaboration.model.js';
+import PROJECT from '../../models/project.model.js';
 import { COLLABORATION_STATUS } from '../../typings/index.js';
 import { sendResponse } from '../../utils/response.js';
 
 const acceptInvitation = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
-    const user_id = req.user;
+    const user_id = req.user.user_id;
     const token = req.params.token;
 
-    // Find pending collaboration request for this user
     const collaboration = await COLLABORATION.findOne({
       token,
       author_id: user_id,
@@ -22,6 +26,14 @@ const acceptInvitation = async (req, res) => {
 
     if (!collaboration) {
       return sendResponse(res, 404, 'Invalid or expired token!');
+    }
+
+    const projectInOrg = await PROJECT.exists({
+      _id: collaboration.project_id,
+      org_id,
+    });
+    if (!projectInOrg) {
+      return sendResponse(res, 403, 'Project not in your organization');
     }
 
     collaboration.status = COLLABORATION_STATUS.ACCEPTED;
