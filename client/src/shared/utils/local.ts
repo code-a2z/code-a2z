@@ -12,6 +12,18 @@ export const removeFromLocal = (key: string) => {
   localStorage.removeItem(key);
 };
 
+export const getSelectedOrgId = (): string | null => {
+  return lookInLocal(TOKEN_CONFIG.SELECTED_ORG_ID);
+};
+
+export const setSelectedOrgId = (orgId: string) => {
+  storeInLocal(TOKEN_CONFIG.SELECTED_ORG_ID, orgId);
+};
+
+export const clearSelectedOrgId = () => {
+  removeFromLocal(TOKEN_CONFIG.SELECTED_ORG_ID);
+};
+
 export const logOutUser = () => {
   localStorage.clear();
 };
