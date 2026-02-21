@@ -24,6 +24,37 @@ export const clearSelectedOrgId = () => {
   removeFromLocal(TOKEN_CONFIG.SELECTED_ORG_ID);
 };
 
+const ORGS_LIST_KEY = 'orgs_list';
+
+export const getOrgsList = (): Array<{
+  org_id: string;
+  name: string;
+  role: string;
+}> | null => {
+  try {
+    const raw = lookInLocal(ORGS_LIST_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Array<{
+      org_id: string;
+      name: string;
+      role: string;
+    }>;
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+export const setOrgsList = (
+  orgs: Array<{ org_id: string; name: string; role: string }>
+) => {
+  storeInLocal(ORGS_LIST_KEY, JSON.stringify(orgs));
+};
+
+export const clearOrgsList = () => {
+  removeFromLocal(ORGS_LIST_KEY);
+};
+
 export const logOutUser = () => {
   localStorage.clear();
 };
