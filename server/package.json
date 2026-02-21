@@ -23,6 +23,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "seed:default-org": "node src/scripts/seed-default-org.js",
     "build": "echo 'No build process required'",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
