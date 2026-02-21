@@ -37,35 +37,57 @@ const postAcceptInvite = async (req, res) => {
     return sendResponse(res, 400, 'Full name must be at least 3 characters');
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  const useTransaction =
+    process.env.MONGODB_URL && !process.env.MONGODB_URL.includes('_test');
+  let session = null;
+  if (useTransaction) {
+    session = await mongoose.startSession();
+    session.startTransaction();
+  }
+  const sessionOpts = session ? { session } : {};
 
   try {
-    const invite = await ORGANIZATION_INVITE.findOne({
+    let query = ORGANIZATION_INVITE.findOne({
       token: token.trim(),
       status: 'pending',
       expires_at: { $gt: new Date() },
-    })
-      .session(session)
-      .lean();
+    });
+    if (session) query = query.session(session);
+    const invite = await query.lean();
 
     if (!invite) {
-      await session.abortTransaction();
+      if (session) {
+        try {
+          await session.abortTransaction();
+        } catch {
+          /* ignore */
+        }
+        try {
+          await session.endSession();
+        } catch {
+          /* ignore */
+        }
+      }
       return sendResponse(res, 404, 'Invite not found or expired');
     }
 
     const email = invite.email;
-    let subscriber = await SUBSCRIBER.findOne({ email }).session(session).lean();
+    query = SUBSCRIBER.findOne({ email });
+    if (session) query = query.session(session);
+    let subscriber = await query.lean();
     let user;
 
     if (subscriber) {
-      user = await USER.findOne({
+      query = USER.findOne({
         'personal_info.subscriber_id': subscriber._id,
-      })
-        .session(session)
-        .lean();
+      });
+      if (session) query = query.session(session);
+      user = await query.lean();
       if (!user) {
-        await session.abortTransaction();
+        if (session) {
+          await session.abortTransaction();
+          session.endSession();
+        }
         return sendResponse(res, 500, 'User record missing for this email');
       }
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -77,12 +99,12 @@ const postAcceptInvite = async (req, res) => {
             'personal_info.fullname': trimmedFullname,
           },
         },
-        { session }
+        sessionOpts
       );
     } else {
       subscriber = await SUBSCRIBER.create(
         [{ email, is_subscribed: true }],
-        { session }
+        sessionOpts
       ).then(r => r[0]);
       const username = await generateUsername(email);
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -98,25 +120,27 @@ const postAcceptInvite = async (req, res) => {
             role: USER_ROLES.USER,
           },
         ],
-        { session }
+        sessionOpts
       ).then(r => r[0]);
       user = newUser;
     }
 
-    const existingMember = await ORGANIZATION_MEMBER.findOne({
+    query = ORGANIZATION_MEMBER.findOne({
       org_id: invite.org_id,
       user_id: user._id,
-    })
-      .session(session)
-      .lean();
+    });
+    if (session) query = query.session(session);
+    const existingMember = await query.lean();
     if (existingMember) {
       await ORGANIZATION_INVITE.updateOne(
         { _id: invite._id },
         { $set: { status: 'accepted' } },
-        { session }
+        sessionOpts
       );
-      await session.commitTransaction();
-      session.endSession();
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
       return sendResponse(
         res,
         409,
@@ -132,17 +156,19 @@ const postAcceptInvite = async (req, res) => {
           role: invite.role,
         },
       ],
-      { session }
+      sessionOpts
     );
 
     await ORGANIZATION_INVITE.updateOne(
       { _id: invite._id },
       { $set: { status: 'accepted' } },
-      { session }
+      sessionOpts
     );
 
-    await session.commitTransaction();
-    session.endSession();
+    if (session) {
+      await session.commitTransaction();
+      session.endSession();
+    }
 
     const memberships = await ORGANIZATION_MEMBER.find({ user_id: user._id })
       .populate('org_id', 'name slug')
@@ -176,8 +202,10 @@ const postAcceptInvite = async (req, res) => {
       access_token,
     });
   } catch (err) {
-    await session.abortTransaction().catch(() => {});
-    session.endSession();
+    if (session) {
+      await session.abortTransaction().catch(() => {});
+      session.endSession().catch(() => {});
+    }
     return sendResponse(res, 500, err.message || 'Internal Server Error');
   }
 };
