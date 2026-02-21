@@ -21,11 +21,15 @@ const ORGANIZATION_SCHEMA = Schema(
       ],
     },
     enabled_features: {
-      type: [String],
-      enum: {
-        values: FEATURE_LIST,
-        message: 'Invalid feature in enabled_features',
-      },
+      type: [
+        {
+          type: String,
+          enum: {
+            values: FEATURE_LIST,
+            message: 'Invalid feature in enabled_features',
+          },
+        },
+      ],
       default: () => [...FEATURE_LIST],
     },
   },
