@@ -9,7 +9,7 @@ Lib/
 Scripts/
 share/
 pyvenv.cfg
-__pycache__\
+__pycache__/
 
 # Others extension files or caches
 *.ini
