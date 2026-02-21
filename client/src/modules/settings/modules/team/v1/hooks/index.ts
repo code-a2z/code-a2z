@@ -1,13 +1,46 @@
-import { FormEvent, useState } from 'react';
+import { useCallback, useState } from 'react';
+import type { FormEvent } from 'react';
 import { emailRegex } from '../../../../../../shared/utils/regex';
 import { useNotifications } from '../../../../../../shared/hooks/use-notification';
-import { inviteMember } from '../../../../../../infra/rest/apis/organization';
-import { ErrorResponse } from '../../../../../../infra/rest/typings';
+import {
+  inviteMember,
+  getOrganizationMembers,
+} from '../../../../../../infra/rest/apis/organization';
+import type { ErrorResponse } from '../../../../../../infra/rest/typings';
+import type {
+  OrgMember,
+  PendingInvite,
+} from '../../../../../../infra/rest/apis/organization';
 
-export function useInviteForm() {
+export function useMembers() {
+  const [members, setMembers] = useState<OrgMember[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getOrganizationMembers();
+      if (res?.status === 'success' && res.data) {
+        setMembers(res.data.members ?? []);
+        setPendingInvites(res.data.pending_invites ?? []);
+      }
+    } catch {
+      setMembers([]);
+      setPendingInvites([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { members, pendingInvites, loading, refetch };
+}
+
+export function useInviteForm(options?: { onSuccess?: () => void }) {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { addNotification } = useNotifications();
+  const onSuccess = options?.onSuccess;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,6 +76,7 @@ export function useInviteForm() {
           `Invite sent to ${response.data.email} as ${response.data.role}.`
         );
         form.reset();
+        onSuccess?.();
       } else {
         addNotification({
           message: response.message ?? 'Failed to send invite',

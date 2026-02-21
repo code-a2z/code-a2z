@@ -10,11 +10,7 @@ import {
 } from '../../../app/routes/constants/routes';
 import { IntegrationSettingType, SettingTabType } from '../v1/typings';
 import { Navigate, Route } from 'react-router-dom';
-import { Suspense } from 'react';
 import { ProtectedRoute } from '../../../app/routes/auth-routes/protected-route';
-import PermissionGuard from '../../../shared/components/atoms/permission-guard';
-import Loader from '../../../shared/components/molecules/loader';
-import { LOADING } from '../../../app/routes/constants';
 import {
   ProfileLazyComponentV1,
   IntegrationsLazyComponentV1,
@@ -110,11 +106,7 @@ export const settingsRoutes = ({
       key={ROUTES_SETTINGS_V1.TEAM}
       path={ROUTES_SETTINGS_V1.TEAM}
       element={
-        <PermissionGuard feature="org" action="manage_members">
-          <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
-            <TeamLazyComponentV1 />
-          </Suspense>
-        </PermissionGuard>
+        <ProtectedRoute component={TeamLazyComponentV1} hasAccess={true} />
       }
     />,
 
