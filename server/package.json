@@ -31,7 +31,8 @@
     "docker:logs": "docker-compose logs -f",
     "docker:build": "docker-compose build",
     "docker:restart": "docker-compose restart",
-    "seed:dev": "node src/db/seed-dev.js"
+    "seed:dev": "node src/db/seed-dev.js",
+    "approve-request": "node src/db/approve-request.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
