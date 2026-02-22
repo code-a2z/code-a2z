@@ -12,11 +12,14 @@ import ORGANIZATION_MEMBER from '../../models/organization-member.model.js';
 import SUBSCRIBER from '../../models/subscriber.model.js';
 import USER from '../../models/user.model.js';
 import { sendResponse } from '../../utils/response.js';
-import { generatePreOrgToken, generateUsername } from './utils/index.js';
+import {
+  generatePreOrgToken,
+  generateUsername,
+  REFRESH_COOKIE_OPTIONS,
+} from './utils/index.js';
 import { USER_ROLES } from '../../typings/index.js';
 import { ORG_MEMBER_ROLES } from '../../constants/rbac.js';
-import { COOKIE_TOKEN, NODE_ENV } from '../../typings/index.js';
-import { JWT_REFRESH_EXPIRES_IN_NUM, SERVER_ENV } from '../../config/env.js';
+import { COOKIE_TOKEN } from '../../typings/index.js';
 
 const PASSWORD_MIN_LENGTH = 6;
 const FULLNAME_MIN_LENGTH = 3;
@@ -176,13 +179,11 @@ const postSetPasswordAfterApproval = async (req, res) => {
     };
     const { access_token, refresh_token } = generatePreOrgToken(payload);
 
-    res.cookie(COOKIE_TOKEN.REFRESH_TOKEN, refresh_token, {
-      httpOnly: true,
-      secure: SERVER_ENV === NODE_ENV.PRODUCTION,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: JWT_REFRESH_EXPIRES_IN_NUM,
-    });
+    res.cookie(
+      COOKIE_TOKEN.REFRESH_TOKEN,
+      refresh_token,
+      REFRESH_COOKIE_OPTIONS
+    );
 
     const limitedUser = {
       id: user._id,
