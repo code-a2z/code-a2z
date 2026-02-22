@@ -18,11 +18,13 @@ import collaborationRoutes from './api/collaboration.routes.js';
 import feedbackRoutes from './api/feedback.routes.js';
 import chatRoutes from './api/chat.routes.js';
 import organizationRoutes from './api/organization.routes.js';
+import adminRoutes from './api/admin.routes.js';
 
 const router = express.Router();
 
 router.use('/auth', authLimiter, authRoutes);
 router.use('/organization', generalLimiter, organizationRoutes);
+router.use('/admin', generalLimiter, adminRoutes);
 router.use('/subscriber', generalLimiter, subscriberRoutes);
 router.use('/media', generalLimiter, mediaRoutes);
 router.use('/user', generalLimiter, userRoutes);

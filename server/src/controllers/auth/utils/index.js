@@ -6,8 +6,22 @@ import {
   JWT_SECRET_REFRESH_KEY,
   JWT_ACCESS_EXPIRES_IN,
   JWT_REFRESH_EXPIRES_IN,
+  JWT_REFRESH_EXPIRES_IN_NUM,
 } from '../../../config/env.js';
 import { TOKEN_TYPE } from '../../../typings/index.js';
+
+/**
+ * Options for the refresh_token cookie. Use sameSite: 'none' and secure: true
+ * so the cookie is sent on cross-origin requests (e.g. client localhost:5173 → API localhost:8000).
+ * Browsers require Secure when sameSite is 'none'; localhost is treated as secure.
+ */
+export const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none',
+  path: '/',
+  maxAge: JWT_REFRESH_EXPIRES_IN_NUM,
+};
 
 /**
  * Generate a unique username from email

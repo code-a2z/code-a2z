@@ -38,6 +38,7 @@ async function seedTestData() {
     org = await ORGANIZATION.create({
       name: 'Default',
       slug: DEFAULT_ORG_SLUG,
+      status: 'active',
       enabled_features: [...FEATURE_LIST],
     });
   }
@@ -479,6 +480,84 @@ describe('API suite (auth order then in-org)', () => {
         member,
         'OrganizationMember should be created for accepted invite'
       );
+    });
+  });
+
+  describe('12. Organization request (public) POST /api/organization/request', () => {
+    it('success returns 201 and creates pending org', async () => {
+      const slug = `request-ok-${Date.now()}`;
+      const email = `request-ok-${Date.now()}@example.com`;
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'Requested Org',
+          slug,
+          requested_by_email: email,
+          requested_by_name: 'Requester Name',
+        })
+        .expect(201);
+      assert.strictEqual(res.body.status, 'success');
+      assert.match(res.body.message, /submitted|notified/i);
+      assert.ok(res.body.data?.org_id);
+      const org = await ORGANIZATION.findById(res.body.data.org_id).lean();
+      assert.ok(org);
+      assert.strictEqual(org.status, 'pending');
+      assert.strictEqual(org.requested_by_email, email);
+      assert.strictEqual(org.name, 'Requested Org');
+      assert.strictEqual(org.slug, slug);
+      await ORGANIZATION.findByIdAndDelete(res.body.data.org_id);
+    });
+
+    it('with existing slug returns 409', async () => {
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'Other Org',
+          slug: DEFAULT_ORG_SLUG,
+          requested_by_email: `other-${Date.now()}@example.com`,
+        })
+        .expect(409);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /slug|already exists/i);
+    });
+
+    it('duplicate pending email returns 409', async () => {
+      const email = `dup-pending-${Date.now()}@example.com`;
+      const slug1 = `dup-pending-a-${Date.now()}`;
+      await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'First Pending',
+          slug: slug1,
+          requested_by_email: email,
+        })
+        .expect(201);
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'Second Pending',
+          slug: `dup-pending-b-${Date.now()}`,
+          requested_by_email: email,
+        })
+        .expect(409);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /pending|email/i);
+      await ORGANIZATION.deleteOne({
+        status: 'pending',
+        requested_by_email: email,
+      });
+    });
+
+    it('validation missing required returns 400', async () => {
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'No Slug',
+          requested_by_email: 'missing-slug@example.com',
+        })
+        .expect(400);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /required|name|slug|email/i);
     });
   });
 });

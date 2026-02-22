@@ -1,6 +1,26 @@
 import { get, post } from '../..';
 import { ApiResponse } from '../../typings';
 
+export interface RequestOrganizationPayload {
+  name: string;
+  slug: string;
+  requested_by_email: string;
+  requested_by_name?: string;
+}
+
+export interface RequestOrganizationResponseData {
+  org_id: string;
+}
+
+export const requestOrganization = async (
+  payload: RequestOrganizationPayload
+) => {
+  return post<
+    RequestOrganizationPayload,
+    ApiResponse<RequestOrganizationResponseData>
+  >('/api/organization/request', false, payload);
+};
+
 export interface InviteMemberPayload {
   email: string;
   role: string;

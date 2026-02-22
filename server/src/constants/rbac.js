@@ -66,6 +66,8 @@ export const PERMISSIONS = Object.freeze({
   ORG_MANAGE: 'org:manage',
   ORG_MANAGE_MEMBERS: 'org:manage_members',
   ORG_MANAGE_BILLING: 'org:manage_billing',
+  // Platform admin panel (only OWNER of PLATFORM_ADMIN_ORG_ID)
+  ADMIN_PANEL: 'admin_panel:access',
 });
 
 /** All permission strings as array. */
@@ -73,6 +75,7 @@ export const PERMISSION_LIST = Object.values(PERMISSIONS);
 
 /** Organization membership roles (per-org role for a user). */
 export const ORG_MEMBER_ROLES = Object.freeze({
+  OWNER: 'owner',
   ADMIN: 'admin',
   MEMBER: 'member',
   VIEWER: 'viewer',
@@ -126,11 +129,13 @@ const ADMIN_PERMISSIONS = [
 /**
  * Map org membership role -> list of permission strings.
  * Used when issuing tokens or checking requirePermission.
+ * OWNER has same base permissions as ADMIN (ADMIN_PANEL granted separately for platform admin org).
  */
 export const ROLE_PERMISSIONS = Object.freeze({
   [ORG_MEMBER_ROLES.VIEWER]: [...VIEWER_PERMISSIONS],
   [ORG_MEMBER_ROLES.MEMBER]: [...MEMBER_PERMISSIONS],
   [ORG_MEMBER_ROLES.ADMIN]: [...ADMIN_PERMISSIONS],
+  [ORG_MEMBER_ROLES.OWNER]: [...ADMIN_PERMISSIONS],
 });
 
 /**

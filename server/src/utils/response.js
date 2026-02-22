@@ -15,6 +15,7 @@ export const RESPONSE_STATUS_CODES = {
   401: RESPONSE_STATUS.ERROR, // Unauthorized
   403: RESPONSE_STATUS.ERROR, // Forbidden
   404: RESPONSE_STATUS.ERROR, // Not Found
+  409: RESPONSE_STATUS.ERROR, // Conflict
   500: RESPONSE_STATUS.ERROR, // Internal Server Error
 };
 

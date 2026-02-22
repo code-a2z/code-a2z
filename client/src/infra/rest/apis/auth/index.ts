@@ -10,6 +10,9 @@ import {
   AcceptInviteInfoResponseData,
   AcceptInvitePayload,
   AcceptInviteResponseData,
+  SetPasswordInfoResponseData,
+  SetPasswordAfterApprovalPayload,
+  SetPasswordAfterApprovalResponseData,
 } from './typing';
 
 export const signUp = async (payload: signUpPayload) => {
@@ -21,9 +24,10 @@ export const signUp = async (payload: signUpPayload) => {
 };
 
 export const login = async (payload: loginPayload) => {
+  // Use credentials so the response's Set-Cookie (refresh_token) is stored; otherwise refresh returns 401.
   return post<loginPayload, ApiResponse<LoginSignupResponseData>>(
     '/api/auth/login',
-    false,
+    true,
     payload
   );
 };
@@ -70,4 +74,21 @@ export const postAcceptInvite = async (payload: AcceptInvitePayload) => {
     false,
     payload
   );
+};
+
+export const getSetPasswordInfo = async (token: string) => {
+  return get<undefined, ApiResponse<SetPasswordInfoResponseData>>(
+    `/api/auth/set-password?token=${encodeURIComponent(token)}`,
+    false
+  );
+};
+
+export const postSetPasswordAfterApproval = async (
+  payload: SetPasswordAfterApprovalPayload
+) => {
+  // Send credentials so the response's Set-Cookie (refresh_token) is stored; otherwise refresh returns 401.
+  return post<
+    SetPasswordAfterApprovalPayload,
+    ApiResponse<SetPasswordAfterApprovalResponseData>
+  >('/api/auth/set-password-after-approval', true, payload);
 };

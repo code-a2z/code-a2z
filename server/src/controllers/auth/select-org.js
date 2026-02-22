@@ -10,7 +10,12 @@ import USER from '../../models/user.model.js';
 import SUBSCRIBER from '../../models/subscriber.model.js';
 import { sendResponse } from '../../utils/response.js';
 import { generateOrgScopedToken } from './utils/index.js';
-import { getPermissionsForRole } from '../../constants/rbac.js';
+import {
+  getPermissionsForRole,
+  PERMISSIONS,
+  ORG_MEMBER_ROLES,
+} from '../../constants/rbac.js';
+import { PLATFORM_ADMIN_ORG_ID } from '../../config/env.js';
 
 /**
  * Filter permissions to only those for features enabled in the org.
@@ -23,7 +28,7 @@ function filterPermissionsByOrgFeatures(permissions, enabledFeatures) {
   return permissions.filter(perm => {
     const feature = typeof perm === 'string' ? perm.split(':')[0] : null;
     if (!feature) return false;
-    if (feature === 'org') return true;
+    if (feature === 'org' || feature === 'admin_panel') return true;
     return featureSet.has(feature);
   });
 }
@@ -52,7 +57,7 @@ const selectOrg = async (req, res) => {
       user_id: userId,
       org_id,
     })
-      .populate('org_id', 'name slug enabled_features')
+      .populate('org_id', 'name slug enabled_features status')
       .lean();
 
     if (!membership || !membership.org_id) {
@@ -64,10 +69,25 @@ const selectOrg = async (req, res) => {
     }
 
     const org = membership.org_id;
+    const orgStatus = org.status;
+    if (orgStatus && orgStatus !== 'active') {
+      return sendResponse(
+        res,
+        403,
+        'This organization is not available for access'
+      );
+    }
     const role = membership.role;
     const enabledFeatures = org.enabled_features || [];
 
-    const rolePermissions = getPermissionsForRole(role);
+    let rolePermissions = getPermissionsForRole(role);
+    if (
+      PLATFORM_ADMIN_ORG_ID &&
+      String(org._id) === String(PLATFORM_ADMIN_ORG_ID) &&
+      role === ORG_MEMBER_ROLES.OWNER
+    ) {
+      rolePermissions = [...rolePermissions, PERMISSIONS.ADMIN_PANEL];
+    }
     const permissions = filterPermissionsByOrgFeatures(
       rolePermissions,
       enabledFeatures

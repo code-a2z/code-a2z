@@ -8,10 +8,9 @@ import bcrypt from 'bcrypt';
 import USER from '../../models/user.model.js';
 import SUBSCRIBER from '../../models/subscriber.model.js';
 import ORGANIZATION_MEMBER from '../../models/organization-member.model.js';
-import { COOKIE_TOKEN, NODE_ENV } from '../../typings/index.js';
+import { COOKIE_TOKEN } from '../../typings/index.js';
 import { sendResponse } from '../../utils/response.js';
-import { generatePreOrgToken } from './utils/index.js';
-import { JWT_REFRESH_EXPIRES_IN_NUM, SERVER_ENV } from '../../config/env.js';
+import { generatePreOrgToken, REFRESH_COOKIE_OPTIONS } from './utils/index.js';
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -49,11 +48,14 @@ const login = async (req, res) => {
     }
 
     const memberships = await ORGANIZATION_MEMBER.find({ user_id: user._id })
-      .populate('org_id', 'name slug')
+      .populate('org_id', 'name slug status')
       .lean();
 
     const orgs = memberships
-      .filter(m => m.org_id)
+      .filter(
+        m =>
+          m.org_id && (m.org_id.status === 'active' || m.org_id.status == null)
+      )
       .map(m => ({
         org_id: m.org_id._id,
         name: m.org_id.name,
@@ -75,13 +77,11 @@ const login = async (req, res) => {
     };
 
     const { access_token, refresh_token } = generatePreOrgToken(payload);
-    res.cookie(COOKIE_TOKEN.REFRESH_TOKEN, refresh_token, {
-      httpOnly: true,
-      secure: SERVER_ENV === NODE_ENV.PRODUCTION,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: JWT_REFRESH_EXPIRES_IN_NUM,
-    });
+    res.cookie(
+      COOKIE_TOKEN.REFRESH_TOKEN,
+      refresh_token,
+      REFRESH_COOKIE_OPTIONS
+    );
 
     const limitedUser = {
       id: user._id,

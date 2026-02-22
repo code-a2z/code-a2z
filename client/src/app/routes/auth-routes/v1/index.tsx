@@ -10,6 +10,7 @@ import {
   NotesPageLazyComponent,
   CodePageLazyComponent,
   SettingsPageLazyComponent,
+  AdminPageLazyComponent,
 } from '../../../components';
 
 export default function getRoutesV1() {
@@ -63,6 +64,17 @@ export default function getRoutesV1() {
         <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
           <SettingsPageLazyComponent />
         </Suspense>
+      }
+    />,
+    <Route
+      key={ROUTES_V1.ADMIN}
+      path={ROUTES_V1.ADMIN}
+      element={
+        <PermissionGuard feature="admin_panel" action="access">
+          <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
+            <AdminPageLazyComponent />
+          </Suspense>
+        </PermissionGuard>
       }
     />,
   ];
