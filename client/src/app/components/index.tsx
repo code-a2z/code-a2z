@@ -15,6 +15,9 @@ export const AcceptInviteLazyComponent = lazy(
 export const RequestOrgLazyComponent = lazy(
   () => import('../../modules/auth/v1/request-org-page')
 );
+export const SetPasswordLazyComponent = lazy(
+  () => import('../../modules/auth/v1/set-password-page')
+);
 export const HomePageLazyComponent = lazy(
   () => import('../../modules/home/v1')
 );

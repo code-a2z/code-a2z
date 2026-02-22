@@ -6,8 +6,13 @@ import {
   LoginLazyComponent,
   AcceptInviteLazyComponent,
   RequestOrgLazyComponent,
+  SetPasswordLazyComponent,
 } from '../components';
-import { ROUTE_ACCEPT_INVITE, ROUTE_REQUEST_ORG } from './constants/routes';
+import {
+  ROUTE_ACCEPT_INVITE,
+  ROUTE_REQUEST_ORG,
+  ROUTE_SET_PASSWORD,
+} from './constants/routes';
 
 export function AppUnProtectedRoutes() {
   return (
@@ -17,6 +22,14 @@ export function AppUnProtectedRoutes() {
         element={
           <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
             <AcceptInviteLazyComponent />
+          </Suspense>
+        }
+      />
+      <Route
+        path={ROUTE_SET_PASSWORD}
+        element={
+          <Suspense fallback={<Loader size={32} secondary={LOADING} />}>
+            <SetPasswordLazyComponent />
           </Suspense>
         }
       />

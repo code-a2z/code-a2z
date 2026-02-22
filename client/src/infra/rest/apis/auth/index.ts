@@ -10,6 +10,9 @@ import {
   AcceptInviteInfoResponseData,
   AcceptInvitePayload,
   AcceptInviteResponseData,
+  SetPasswordInfoResponseData,
+  SetPasswordAfterApprovalPayload,
+  SetPasswordAfterApprovalResponseData,
 } from './typing';
 
 export const signUp = async (payload: signUpPayload) => {
@@ -70,4 +73,20 @@ export const postAcceptInvite = async (payload: AcceptInvitePayload) => {
     false,
     payload
   );
+};
+
+export const getSetPasswordInfo = async (token: string) => {
+  return get<undefined, ApiResponse<SetPasswordInfoResponseData>>(
+    `/api/auth/set-password?token=${encodeURIComponent(token)}`,
+    false
+  );
+};
+
+export const postSetPasswordAfterApproval = async (
+  payload: SetPasswordAfterApprovalPayload
+) => {
+  return post<
+    SetPasswordAfterApprovalPayload,
+    ApiResponse<SetPasswordAfterApprovalResponseData>
+  >('/api/auth/set-password-after-approval', false, payload);
 };

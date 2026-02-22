@@ -67,3 +67,22 @@ export interface AcceptInviteResponseData {
   orgs: LoginOrgItem[];
   access_token: string;
 }
+
+/** GET set-password response (org name for valid token). */
+export interface SetPasswordInfoResponseData {
+  org_name: string;
+}
+
+/** POST set-password-after-approval payload. */
+export interface SetPasswordAfterApprovalPayload {
+  token: string;
+  password: string;
+  fullname?: string;
+}
+
+/** POST set-password-after-approval response (same as login). */
+export interface SetPasswordAfterApprovalResponseData {
+  user: AuthUser;
+  orgs: LoginOrgItem[];
+  access_token: string;
+}

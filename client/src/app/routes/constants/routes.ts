@@ -7,6 +7,9 @@ export const ROUTE_ACCEPT_INVITE = '/accept-invite';
 /** Public route to request a new organization. */
 export const ROUTE_REQUEST_ORG = '/request-org';
 
+/** Public route to set password after org approval (token in query). */
+export const ROUTE_SET_PASSWORD = '/set-password';
+
 export enum ROUTES_PAGE_V1 {
   HOME = 'home',
   CHATS = 'chats',
