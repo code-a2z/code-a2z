@@ -38,6 +38,7 @@ async function seedTestData() {
     org = await ORGANIZATION.create({
       name: 'Default',
       slug: DEFAULT_ORG_SLUG,
+      status: 'active',
       enabled_features: [...FEATURE_LIST],
     });
   }
