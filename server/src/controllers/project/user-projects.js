@@ -11,6 +11,10 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const userProjects = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const { page = 1, is_draft, query = '', deletedDocCount = 0 } = req.query;
@@ -20,6 +24,7 @@ const userProjects = async (req, res) => {
 
     const projects = await PROJECT.find({
       user_id,
+      org_id,
       is_draft: is_draft === 'true' || is_draft === true,
       title: new RegExp(query, 'i'),
     })

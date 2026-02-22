@@ -1,14 +1,12 @@
-import { Box, styled, Typography } from '@mui/material';
+import { Box, Link, styled, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import InputBox from '../../../shared/components/atoms/input-box';
 import EmailIcon from '@mui/icons-material/Email';
-import PersonIcon from '@mui/icons-material/Person';
 import PasswordIcon from '@mui/icons-material/Password';
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import LoginIcon from '@mui/icons-material/Login';
 import A2ZButton from '../../../shared/components/atoms/button';
 import { useUserAuthForm } from './hooks';
-import { useState } from 'react';
-import A2ZTypography from '../../../shared/components/atoms/typography';
+import { ROUTE_REQUEST_ORG } from '../../../app/routes/constants/routes';
 
 const StyledSection = styled('section')(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -34,23 +32,13 @@ const StyledTitle = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(6),
 }));
 
-const StyledFooter = styled('p')(({ theme }) => ({
-  marginTop: theme.spacing(6),
-  color: theme.palette.text.secondary,
-  fontSize: '1.125rem',
-  textAlign: 'center',
-}));
-
 const UserAuthForm = () => {
-  const [formType, setFormType] = useState<string>('login');
-  const { loading, handleSubmit } = useUserAuthForm({ type: formType });
+  const { loading, handleSubmit } = useUserAuthForm();
 
   return (
     <StyledSection>
       <StyledForm id="formElement" onSubmit={handleSubmit}>
-        <StyledTitle>
-          {formType === 'login' ? 'Welcome back' : 'Join us today'}
-        </StyledTitle>
+        <StyledTitle>Welcome back</StyledTitle>
 
         <Box
           sx={{
@@ -61,17 +49,6 @@ const UserAuthForm = () => {
             gap: 1,
           }}
         >
-          {formType !== 'login' && (
-            <InputBox
-              id="auth-form-fullname"
-              name="fullname"
-              type="text"
-              placeholder="Full Name"
-              fullWidth
-              icon={<PersonIcon />}
-            />
-          )}
-
           <InputBox
             id="auth-form-email"
             name="email"
@@ -100,34 +77,15 @@ const UserAuthForm = () => {
             loading={loading}
             loadingPosition="end"
           >
-            {formType === 'login' ? 'Login' : 'Sign Up'}
-            {formType === 'login' ? <LoginIcon /> : <AppRegistrationIcon />}
+            Login
+            <LoginIcon />
           </A2ZButton>
+          <Typography sx={{ mt: 2 }}>
+            <Link component={RouterLink} to={ROUTE_REQUEST_ORG}>
+              Request organization
+            </Link>
+          </Typography>
         </Box>
-
-        <StyledFooter>
-          {formType === 'login'
-            ? "Don't have an account ?"
-            : 'Already a member ?'}{' '}
-          <A2ZTypography
-            text={formType === 'login' ? 'Join us today' : 'Sign in here'}
-            component="span"
-            props={{
-              onClick: () =>
-                setFormType(formType === 'login' ? 'signup' : 'login'),
-              sx: {
-                fontSize: '1.125rem',
-                marginLeft: 1,
-                textDecoration: 'underline',
-                color: 'inherit',
-                cursor: 'pointer',
-                '&:hover': {
-                  opacity: 0.8,
-                },
-              },
-            }}
-          />
-        </StyledFooter>
       </StyledForm>
     </StyledSection>
   );

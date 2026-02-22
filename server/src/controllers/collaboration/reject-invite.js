@@ -5,12 +5,17 @@
  */
 
 import COLLABORATION from '../../models/collaboration.model.js';
+import PROJECT from '../../models/project.model.js';
 import { COLLABORATION_STATUS } from '../../typings/index.js';
 import { sendResponse } from '../../utils/response.js';
 
 const rejectInvitation = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
-    const user_id = req.user;
+    const user_id = req.user.user_id;
     const token = req.params.token;
 
     const collaboration = await COLLABORATION.findOne({
@@ -21,6 +26,14 @@ const rejectInvitation = async (req, res) => {
 
     if (!collaboration) {
       return sendResponse(res, 404, 'Invalid or expired token!');
+    }
+
+    const projectInOrg = await PROJECT.exists({
+      _id: collaboration.project_id,
+      org_id,
+    });
+    if (!projectInOrg) {
+      return sendResponse(res, 403, 'Project not in your organization');
     }
 
     // Update status to rejected and invalidate token

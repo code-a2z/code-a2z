@@ -39,6 +39,12 @@ const PROJECT_SCHEMA = Schema(
       required: true,
       ref: COLLECTION_NAMES.USERS,
     },
+    org_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: COLLECTION_NAMES.ORGANIZATIONS,
+      index: true,
+    },
     activity: {
       total_likes: {
         type: Number,

@@ -40,3 +40,6 @@ export const CLOUDINARY_API_SECRET =
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'dev.admin@example.com';
 export const RESEND_API_KEY =
   process.env.RESEND_API_KEY || 'dev_resend_key_abc123';
+
+// Platform admin: org_id whose OWNER receives ADMIN_PANEL permission
+export const PLATFORM_ADMIN_ORG_ID = process.env.PLATFORM_ADMIN_ORG_ID || null;

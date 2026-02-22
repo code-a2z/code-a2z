@@ -1,16 +1,21 @@
 import { useCallback, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import ChatIcon from '@mui/icons-material/Chat';
 import NotesIcon from '@mui/icons-material/Notes';
 import CodeIcon from '@mui/icons-material/Code';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsIcon from '@mui/icons-material/Settings';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { SideBarItemsType } from '../typings';
 import {
   ROUTES_PAGE_V1,
   ROUTES_V1,
+  ROUTE_SELECT_ORG,
 } from '../../../../../app/routes/constants/routes';
 import { useAuth } from '../../../../hooks/use-auth';
+import { useHasPermission } from '../../../../hooks/use-has-permission';
 
 const logoutStyle = {
   marginTop: 'auto',
@@ -20,8 +25,20 @@ const logoutStyle = {
 const useSidebar = () => {
   const [showExpandedView, setShowExpandedView] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
 
-  const { logout } = useAuth();
+  const { logout, switchOrg } = useAuth();
+  const hasChats = useHasPermission('chats', 'read');
+  const hasNotes = useHasPermission('notes', 'read');
+  const hasCode = useHasPermission('code', 'read');
+  const hasAdminPanel = useHasPermission('admin_panel', 'access');
+
+  const handleSwitchOrg = useCallback(async () => {
+    const switched = await switchOrg();
+    if (switched) {
+      navigate(ROUTE_SELECT_ORG, { replace: true });
+    }
+  }, [switchOrg, navigate]);
 
   // open modal
   const handleLogoutClick = useCallback(() => {
@@ -55,21 +72,21 @@ const useSidebar = () => {
         path: ROUTES_V1.CHATS,
         title: 'Chats',
         screenName: ROUTES_PAGE_V1.CHATS,
-        hasAccess: false,
+        hasAccess: hasChats,
       },
       {
         icon: NotesIcon,
         path: ROUTES_V1.NOTES,
         title: 'Notes',
         screenName: ROUTES_PAGE_V1.NOTES,
-        hasAccess: false,
+        hasAccess: hasNotes,
       },
       {
         icon: CodeIcon,
         path: ROUTES_V1.CODE,
         title: 'Code',
         screenName: ROUTES_PAGE_V1.CODE,
-        hasAccess: false,
+        hasAccess: hasCode,
       },
       {
         icon: SettingsIcon,
@@ -77,9 +94,23 @@ const useSidebar = () => {
         title: 'Settings',
         screenName: ROUTES_PAGE_V1.SETTINGS,
       },
+      {
+        icon: AdminPanelSettingsIcon,
+        path: ROUTES_V1.ADMIN,
+        title: 'Admin',
+        screenName: ROUTES_PAGE_V1.ADMIN,
+        hasAccess: hasAdminPanel,
+      },
     ];
 
     const secondaryItems: SideBarItemsType[] = [
+      {
+        icon: SwapHorizIcon,
+        onClick: () => {
+          void handleSwitchOrg();
+        },
+        title: 'Switch organization',
+      },
       {
         icon: PowerSettingsNewIcon,
         onClick: handleLogoutClick,
@@ -89,10 +120,17 @@ const useSidebar = () => {
     ];
 
     return {
-      items: items.filter(({ disable }) => !disable),
+      items: items.filter(item => !item.disable && item.hasAccess !== false),
       secondaryItems: secondaryItems.filter(({ disable }) => !disable),
     };
-  }, [handleLogoutClick]);
+  }, [
+    handleLogoutClick,
+    handleSwitchOrg,
+    hasChats,
+    hasNotes,
+    hasCode,
+    hasAdminPanel,
+  ]);
 
   return {
     showExpandedView,

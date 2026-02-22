@@ -10,6 +10,10 @@ import USER from '../../models/user.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const createCollection = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const { collection_name, description } = req.body;
@@ -30,9 +34,10 @@ const createCollection = async (req, res) => {
       );
     }
 
-    // Check for duplicate collection name for the same user
+    // Check for duplicate collection name for the same user in this org
     const existing_collection = await COLLECTION.findOne({
       user_id,
+      org_id,
       collection_name: collection_name.trim(),
     });
     if (existing_collection) {
@@ -43,9 +48,10 @@ const createCollection = async (req, res) => {
       );
     }
 
-    // Create new collection
+    // Create new collection (org-scoped)
     const new_collection = await COLLECTION.create({
       user_id,
+      org_id,
       collection_name,
       description,
     });

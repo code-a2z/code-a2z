@@ -11,6 +11,10 @@ import { sendResponse } from '../../utils/response.js';
 import { NOTIFICATION_TYPES } from '../../typings/index.js';
 
 const likeProject = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const { project_id, is_liked_by_user } = req.body;
@@ -21,9 +25,9 @@ const likeProject = async (req, res) => {
 
     const incrementVal = is_liked_by_user ? 1 : -1;
 
-    // Update project like count
+    // Update project like count (only projects in current org)
     const project = await PROJECT.findOneAndUpdate(
-      { _id: project_id },
+      { _id: project_id, org_id },
       { $inc: { 'activity.total_likes': incrementVal } },
       { new: true }
     );
@@ -32,13 +36,14 @@ const likeProject = async (req, res) => {
       return sendResponse(res, 404, 'Project not found');
     }
 
-    // Handle like / unlike notifications
+    // Handle like / unlike notifications (org-scoped)
     if (is_liked_by_user) {
       await NOTIFICATION.create({
         type: NOTIFICATION_TYPES.LIKE,
         project_id,
         user_id: user_id,
         author_id: project.user_id,
+        org_id,
       });
 
       return sendResponse(res, 200, 'Project liked successfully!', {
@@ -51,6 +56,7 @@ const likeProject = async (req, res) => {
         project_id,
         user_id: user_id,
         author_id: project.user_id,
+        org_id,
       });
 
       return sendResponse(res, 200, 'Project unliked successfully', {

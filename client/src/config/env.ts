@@ -16,4 +16,5 @@ export const TOKEN_CONFIG = {
   ACCESS_TOKEN_NAME: import.meta.env.VITE_ACCESS_TOKEN_NAME || 'access_token',
   REFRESH_TOKEN_NAME:
     import.meta.env.VITE_REFRESH_TOKEN_NAME || 'refresh_token',
+  SELECTED_ORG_ID: 'selected_org_id',
 } as const;

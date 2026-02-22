@@ -42,7 +42,12 @@ const getConversations = async (req, res) => {
               $cond: [
                 {
                   $and: [
-                    { $eq: ['$receiver_id', new mongoose.Types.ObjectId(user_id)] },
+                    {
+                      $eq: [
+                        '$receiver_id',
+                        new mongoose.Types.ObjectId(user_id),
+                      ],
+                    },
                     { $eq: ['$read', false] },
                   ],
                 },

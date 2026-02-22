@@ -8,6 +8,12 @@ const COLLECTION_SCHEMA = Schema(
       required: true,
       ref: COLLECTION_NAMES.USERS,
     },
+    org_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: COLLECTION_NAMES.ORGANIZATIONS,
+      index: true,
+    },
     collection_name: {
       type: String,
       lowercase: true,

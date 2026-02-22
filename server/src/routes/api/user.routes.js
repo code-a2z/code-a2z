@@ -1,6 +1,8 @@
 import express from 'express';
 
-import authenticateUser from '../../middlewares/auth.middleware.js';
+import authenticateUser, {
+  requireOrgScope,
+} from '../../middlewares/auth.middleware.js';
 
 import getProfile from '../../controllers/user/get-profile.js';
 import getCurrentUser from '../../controllers/user/get-current-user.js';
@@ -12,8 +14,18 @@ const userRoutes = express.Router();
 
 userRoutes.get('/search', searchUser);
 userRoutes.get('/profile', getProfile);
-userRoutes.get('/me', authenticateUser, getCurrentUser);
-userRoutes.patch('/update-profile-img', authenticateUser, updateProfileImg);
-userRoutes.patch('/update-profile', authenticateUser, updateProfile);
+userRoutes.get('/me', authenticateUser, requireOrgScope, getCurrentUser);
+userRoutes.patch(
+  '/update-profile-img',
+  authenticateUser,
+  requireOrgScope,
+  updateProfileImg
+);
+userRoutes.patch(
+  '/update-profile',
+  authenticateUser,
+  requireOrgScope,
+  updateProfile
+);
 
 export default userRoutes;

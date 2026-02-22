@@ -7,11 +7,16 @@ import NOTIFICATION from '../../models/notification.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const notificationStatus = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const user_id = req.user.user_id;
 
   try {
     const result = await NOTIFICATION.exists({
       author_id: user_id,
+      org_id,
       user_id: { $ne: user_id },
       seen: false,
     });

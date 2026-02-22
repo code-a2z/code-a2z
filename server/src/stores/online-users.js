@@ -12,7 +12,7 @@ const presenceMap = new Map();
  * Mark user as online (refresh lastSeen).
  * @param {string} userId
  */
-export const setPresence = (userId) => {
+export const setPresence = userId => {
   if (!userId) return;
   presenceMap.set(String(userId), Date.now());
 };
@@ -38,7 +38,7 @@ export const getOnlineUserIds = () => {
  * Remove user from presence map (called on disconnect)
  * @param {string} userId
  */
-export const removePresence = (userId) => {
+export const removePresence = userId => {
   if (!userId) return;
   presenceMap.delete(String(userId));
 };

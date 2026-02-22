@@ -9,6 +9,12 @@ export const COOKIE_TOKEN = {
   REFRESH_TOKEN: 'refresh_token',
 };
 
+/** JWT token scope: pre_org = before org selection; org_scoped = after select-org. */
+export const TOKEN_TYPE = {
+  PRE_ORG: 'pre_org',
+  ORG_SCOPED: 'org_scoped',
+};
+
 export const USER_ROLES = {
   USER: 'user',
   MAINTAINER: 'maintainer',

@@ -20,15 +20,19 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "MONGODB_URL=mongodb://localhost:27017/code_a2z_test node --test src/__tests__/api.test.js",
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "seed:default-org": "node src/db/seed-default-org.js",
+    "migrate:org-id": "node src/db/migrate-org-id.js",
     "build": "echo 'No build process required'",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "docker:build": "docker-compose build",
-    "docker:restart": "docker-compose restart"
+    "docker:restart": "docker-compose restart",
+    "seed:dev": "node src/db/seed-dev.js",
+    "approve-request": "node src/db/approve-request.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -53,6 +57,8 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }

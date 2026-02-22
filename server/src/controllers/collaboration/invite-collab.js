@@ -15,6 +15,10 @@ import { ADMIN_EMAIL, VITE_SERVER_DOMAIN } from '../../config/env.js';
 import { COLLABORATION_STATUS } from '../../typings/index.js';
 
 const invitationToCollaborate = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const { project_id } = req.params;
@@ -27,8 +31,11 @@ const invitationToCollaborate = async (req, res) => {
     const user = await USER.findById(user_id).select('personal_info.fullname');
     if (!user) return sendResponse(res, 404, 'User not found');
 
-    // Validate project and populate author email
-    const project = await PROJECT.findOne({ _id: project_id }).populate({
+    // Validate project in current org and populate author email
+    const project = await PROJECT.findOne({
+      _id: project_id,
+      org_id,
+    }).populate({
       path: 'user_id',
       select: 'personal_info.subscriber_id',
     });

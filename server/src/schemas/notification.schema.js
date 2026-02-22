@@ -30,6 +30,12 @@ const NOTIFICATION_SCHEMA = Schema(
       required: true,
       ref: COLLECTION_NAMES.USERS,
     },
+    org_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: COLLECTION_NAMES.ORGANIZATIONS,
+      index: true,
+    },
     comment_id: {
       type: Schema.Types.ObjectId,
       ref: COLLECTION_NAMES.COMMENTS,

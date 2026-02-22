@@ -10,9 +10,13 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const searchProjectsCount = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   const { tag, user_id, query } = req.query;
 
-  let findQuery = { is_draft: false };
+  let findQuery = { is_draft: false, org_id };
   if (tag) {
     findQuery.tags = tag;
   } else if (query) {

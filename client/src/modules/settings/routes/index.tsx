@@ -2,6 +2,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ExtensionIcon from '@mui/icons-material/Extension';
 import ArticleIcon from '@mui/icons-material/Article';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import PeopleIcon from '@mui/icons-material/People';
 import {
   ROUTES_V1,
   ROUTES_SETTINGS_V1,
@@ -16,6 +17,7 @@ import {
   OpenAILazyComponentV1,
   ManageArticlesLazyComponentV1,
   NotificationLazyComponentV1,
+  TeamLazyComponentV1,
 } from '../modules';
 import OpenAIIcon from '../../../shared/icons/openai';
 
@@ -52,6 +54,13 @@ export const settingsRoutes = ({
       path: ROUTES_SETTINGS_V1.INTEGRATIONS,
       name: 'Integrations',
       description: 'Connect your accounts and services',
+    },
+    {
+      id: 'team',
+      icon: <PeopleIcon sx={{ fontSize: 20 }} />,
+      path: ROUTES_SETTINGS_V1.TEAM,
+      name: 'Team',
+      description: 'Invite and manage organization members',
     },
   ];
 
@@ -91,6 +100,13 @@ export const settingsRoutes = ({
           component={IntegrationsLazyComponentV1}
           hasAccess={true}
         />
+      }
+    />,
+    <Route
+      key={ROUTES_SETTINGS_V1.TEAM}
+      path={ROUTES_SETTINGS_V1.TEAM}
+      element={
+        <ProtectedRoute component={TeamLazyComponentV1} hasAccess={true} />
       }
     />,
 

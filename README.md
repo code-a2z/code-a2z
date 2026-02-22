@@ -86,6 +86,16 @@ Future releases will expand into AI-driven productivity tools, personalized feed
 > - Follow the setup method that best fits your contribution focus.
 > - You can get required credentials from the `/docs` folder [`SETUP.md`](./docs/SETUP.md).
 
+### Run locally
+
+1. **MongoDB** — Install and start MongoDB (e.g. `mongodb://localhost:27017`).
+2. **Env** — From repo root: `cp client/.env.example client/.env` and `cp server/.env.example server/.env`; set `MONGODB_URL` and, for full-stack, `VITE_SERVER_DOMAIN=http://localhost:8000` in `client/.env`.
+3. **Server** — `npm run server` (or from `server/`: `npm install` then `npm run dev`). Optional: `npm run seed:dev` to seed the default org.
+4. **Client** — `npm run client` (or from `client/`: `npm install` then `npm run dev`).
+5. **API tests** — From `server/`: `npm test` (uses `MONGODB_URL`, default `code_a2z_test`).
+
+For full steps and frontend-only vs full-stack modes, see [SETUP.md](./docs/SETUP.md).
+
 ## Features Checklist
 
 > [!NOTE]  

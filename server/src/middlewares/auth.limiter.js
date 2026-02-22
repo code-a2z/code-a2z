@@ -8,6 +8,12 @@ const authLimit = new RateLimiterMemory({
 });
 
 const authLimiter = (req, res, next) => {
+  const isTest =
+    process.env.NODE_ENV === 'test' ||
+    (process.env.MONGODB_URL && process.env.MONGODB_URL.includes('_test'));
+  if (isTest) {
+    return next();
+  }
   authLimit
     .consume(req.ip)
     .then(() => next())
@@ -15,23 +21,3 @@ const authLimiter = (req, res, next) => {
 };
 
 export default authLimiter;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

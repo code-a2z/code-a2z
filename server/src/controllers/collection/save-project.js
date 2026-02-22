@@ -11,6 +11,10 @@ import PROJECT from '../../models/project.model.js';
 import { sendResponse } from '../../utils/response.js';
 
 const saveProjectInCollection = async (req, res) => {
+  const org_id = req.user?.org_id;
+  if (!org_id) {
+    return sendResponse(res, 403, 'Organization context required');
+  }
   try {
     const user_id = req.user.user_id;
     const { collection_id, project_id } = req.body;
@@ -23,15 +27,19 @@ const saveProjectInCollection = async (req, res) => {
       return sendResponse(res, 400, 'Invalid or missing project_id');
     }
 
-    // Check project existence
-    const project_exists = await PROJECT.exists({ _id: project_id });
+    // Check project exists and belongs to current org
+    const project_exists = await PROJECT.exists({
+      _id: project_id,
+      org_id,
+    });
     if (!project_exists) {
       return sendResponse(res, 404, 'Project not found');
     }
 
-    // Check collection existence for user
+    // Check collection existence for user in this org
     const collection = await COLLECTION.findOne({
       user_id,
+      org_id,
       _id: collection_id,
     });
     if (!collection) {
@@ -48,7 +56,7 @@ const saveProjectInCollection = async (req, res) => {
     }
 
     await COLLECTION.updateOne(
-      { user_id, _id: collection_id },
+      { user_id, org_id, _id: collection_id },
       { $push: { project_ids: project_id } }
     );
 

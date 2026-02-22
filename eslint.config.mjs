@@ -45,4 +45,23 @@ export default defineConfig([
     plugins: { css },
     language: "css/css",
   },
+  {
+    files: ["server/__tests__/**/*.js", "server/**/*.test.js"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        describe: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        jest: "readonly",
+      },
+    },
+    rules: {
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    },
+  },
 ]);
