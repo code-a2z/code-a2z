@@ -29,8 +29,14 @@ const getMessages = async (req, res) => {
         { sender_id: otherUserId, receiver_id: user_id },
       ],
     })
-      .populate('sender_id', 'personal_info.fullname personal_info.username personal_info.profile_img')
-      .populate('receiver_id', 'personal_info.fullname personal_info.username personal_info.profile_img')
+      .populate(
+        'sender_id',
+        'personal_info.fullname personal_info.username personal_info.profile_img'
+      )
+      .populate(
+        'receiver_id',
+        'personal_info.fullname personal_info.username personal_info.profile_img'
+      )
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip(skip)

@@ -18,16 +18,18 @@ const getUsersWithStatus = async (req, res) => {
 
     // Build online user set for quick lookup
     const onlineIds = getOnlineUserIds();
-    const onlineSet = new Set(onlineIds.map((id) => String(id)));
+    const onlineSet = new Set(onlineIds.map(id => String(id)));
 
     // Fetch all users except the current one with limited profile fields
     const users = await USER.find({
       _id: { $ne: new mongoose.Types.ObjectId(String(user_id)) },
     })
-      .select('_id personal_info.fullname personal_info.username personal_info.profile_img')
+      .select(
+        '_id personal_info.fullname personal_info.username personal_info.profile_img'
+      )
       .lean();
 
-    const data = users.map((u) => ({
+    const data = users.map(u => ({
       _id: u._id,
       personal_info: {
         fullname: u.personal_info?.fullname ?? '',
@@ -37,11 +39,15 @@ const getUsersWithStatus = async (req, res) => {
       isOnline: onlineSet.has(String(u._id)),
     }));
 
-    return sendResponse(res, 200, 'Users with status fetched successfully', data);
+    return sendResponse(
+      res,
+      200,
+      'Users with status fetched successfully',
+      data
+    );
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Internal Server Error');
   }
 };
 
 export default getUsersWithStatus;
-

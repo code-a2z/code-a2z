@@ -15,17 +15,21 @@ const getOnlineUsers = async (req, res) => {
       return sendResponse(res, 401, 'User ID not found in token');
     }
 
-    const onlineIds = getOnlineUserIds().filter((id) => String(id) !== String(user_id));
+    const onlineIds = getOnlineUserIds().filter(
+      id => String(id) !== String(user_id)
+    );
     if (onlineIds.length === 0) {
       return sendResponse(res, 200, 'Online users fetched successfully', []);
     }
 
-    const objectIds = onlineIds.map((id) => new mongoose.Types.ObjectId(id));
+    const objectIds = onlineIds.map(id => new mongoose.Types.ObjectId(id));
     const users = await USER.find({ _id: { $in: objectIds } })
-      .select('_id personal_info.fullname personal_info.username personal_info.profile_img')
+      .select(
+        '_id personal_info.fullname personal_info.username personal_info.profile_img'
+      )
       .lean();
 
-    const data = users.map((u) => ({
+    const data = users.map(u => ({
       _id: u._id,
       personal_info: {
         fullname: u.personal_info?.fullname ?? '',

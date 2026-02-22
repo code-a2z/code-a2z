@@ -8,7 +8,7 @@ import { setPresence, removePresence } from '../stores/online-users.js';
  * @param {import('http').Server} httpServer - HTTP server instance
  * @returns {Server} Socket.IO server instance
  */
-export const initializeSocketIO = (httpServer) => {
+export const initializeSocketIO = httpServer => {
   const io = new Server(httpServer, {
     cors: {
       origin: true,
@@ -31,21 +31,27 @@ export const initializeSocketIO = (httpServer) => {
     try {
       jwt.verify(token, JWT_SECRET_ACCESS_KEY, (err, decoded) => {
         if (err) {
-          return next(new Error('Authentication error: Invalid or expired token'));
+          return next(
+            new Error('Authentication error: Invalid or expired token')
+          );
         }
         socket.userId = decoded.user_id;
         socket.user = decoded;
         next();
       });
     } catch (error) {
-      next(new Error('Authentication error: Token verification failed'));
+      next(
+        new Error(
+          `Authentication error: Token verification failed: ${error.message}`
+        )
+      );
     }
   });
 
   // Store active socket connections: userId -> socketId
   const activeConnections = new Map();
 
-  io.on('connection', (socket) => {
+  io.on('connection', socket => {
     const userId = socket.userId;
     console.log(`User ${userId} connected with socket ID: ${socket.id}`);
 
@@ -60,7 +66,7 @@ export const initializeSocketIO = (httpServer) => {
     socket.broadcast.emit('user:online', { userId });
 
     // Handle sending a message
-    socket.on('message:send', async (data) => {
+    socket.on('message:send', async data => {
       try {
         const { receiverId, message } = data;
 
@@ -82,7 +88,10 @@ export const initializeSocketIO = (httpServer) => {
         });
 
         // Populate sender info
-        await newMessage.populate('sender_id', 'personal_info.fullname personal_info.username personal_info.profile_img');
+        await newMessage.populate(
+          'sender_id',
+          'personal_info.fullname personal_info.username personal_info.profile_img'
+        );
 
         // Prepare message data
         const messageData = {
@@ -113,7 +122,7 @@ export const initializeSocketIO = (httpServer) => {
     });
 
     // Handle typing indicator
-    socket.on('typing:start', (data) => {
+    socket.on('typing:start', data => {
       const { receiverId } = data;
       if (receiverId) {
         const receiverSocketId = activeConnections.get(String(receiverId));
@@ -125,7 +134,7 @@ export const initializeSocketIO = (httpServer) => {
       }
     });
 
-    socket.on('typing:stop', (data) => {
+    socket.on('typing:stop', data => {
       const { receiverId } = data;
       if (receiverId) {
         const receiverSocketId = activeConnections.get(String(receiverId));
@@ -138,7 +147,7 @@ export const initializeSocketIO = (httpServer) => {
     });
 
     // Handle marking messages as read
-    socket.on('message:read', async (data) => {
+    socket.on('message:read', async data => {
       try {
         const { senderId } = data;
 
