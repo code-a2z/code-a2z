@@ -32,7 +32,8 @@
     "docker:build": "docker-compose build",
     "docker:restart": "docker-compose restart",
     "seed:dev": "node src/db/seed-dev.js",
-    "approve-request": "node src/db/approve-request.js"
+    "approve-request": "node src/db/approve-request.js",
+    "list-invite-links": "node src/db/list-invite-links.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

@@ -96,6 +96,19 @@ Future releases will expand into AI-driven productivity tools, personalized feed
 
 For full steps and frontend-only vs full-stack modes, see [SETUP.md](./docs/SETUP.md).
 
+### Contributor test accounts
+
+You can log in to the deployed app ([code-a2z.vercel.app](https://code-a2z.vercel.app)) with these accounts to explore and test the platform. After login, select the organization to access the app.
+
+| Role   | Email              | Password       |
+| ------ | ------------------ | -------------- |
+| Viewer | viewer@codea2z.com | Viewer@CodeA2Z |
+| Member | member@codea2z.com | Member@CodeA2Z |
+| Admin  | admin@codea2z.com  | Admin@CodeA2Z  |
+
+> [!NOTE]  
+> These accounts are for contributor testing only. Do not use them for production or store sensitive data.
+
 ## Features Checklist
 
 > [!NOTE]  
