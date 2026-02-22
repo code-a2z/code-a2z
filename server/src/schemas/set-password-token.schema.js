@@ -7,7 +7,6 @@ const SET_PASSWORD_TOKEN_SCHEMA = Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     email: {
       type: String,
