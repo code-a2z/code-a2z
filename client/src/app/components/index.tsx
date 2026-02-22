@@ -33,6 +33,9 @@ export const SettingsPageLazyComponent = lazy(
 export const NotesPageLazyComponent = lazy(
   () => import('../../modules/notes/v1')
 );
+export const AdminPageLazyComponent = lazy(
+  () => import('../../modules/admin/v1')
+);
 
 export const AppLayout = () => {
   return (
