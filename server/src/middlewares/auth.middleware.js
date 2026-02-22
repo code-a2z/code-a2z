@@ -92,7 +92,10 @@ const requirePermission = (feature, action) => {
     const orgFeatures = Array.isArray(req.user.org_features)
       ? req.user.org_features
       : [];
-    const hasFeature = orgFeatures.includes(feature);
+    const hasFeature =
+      feature === 'org' ||
+      feature === 'admin_panel' ||
+      orgFeatures.includes(feature);
     const hasPermission = permissions.includes(permission);
     if (!hasFeature || !hasPermission) {
       return sendResponse(res, 403, 'Insufficient permissions for this action');

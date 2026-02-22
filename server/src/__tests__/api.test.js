@@ -11,8 +11,10 @@ import bcrypt from 'bcrypt';
 
 import app from '../app.js';
 import { MONGODB_URL } from '../config/env.js';
+import { nanoid } from 'nanoid';
 import ORGANIZATION from '../models/organization.model.js';
 import ORGANIZATION_MEMBER from '../models/organization-member.model.js';
+import ORGANIZATION_INVITE from '../models/organization-invite.model.js';
 import USER from '../models/user.model.js';
 import SUBSCRIBER from '../models/subscriber.model.js';
 import PROJECT from '../models/project.model.js';
@@ -25,6 +27,7 @@ const TEST_PASSWORD = 'Test123';
 const DEFAULT_ORG_SLUG = 'default';
 
 let defaultOrgId;
+let testUserId;
 let preOrgToken;
 let orgScopedToken;
 let createdProjectId;
@@ -35,6 +38,7 @@ async function seedTestData() {
     org = await ORGANIZATION.create({
       name: 'Default',
       slug: DEFAULT_ORG_SLUG,
+      status: 'active',
       enabled_features: [...FEATURE_LIST],
     });
   }
@@ -75,11 +79,13 @@ async function seedTestData() {
       role: ORG_MEMBER_ROLES.ADMIN,
     });
   }
+  testUserId = user._id;
 }
 
 async function cleanupTestData() {
   await PROJECT.deleteMany({ org_id: defaultOrgId });
   await COLLECTION.deleteMany({ org_id: defaultOrgId });
+  await ORGANIZATION_INVITE.deleteMany({ org_id: defaultOrgId });
 }
 
 describe('API suite (auth order then in-org)', () => {
@@ -128,23 +134,57 @@ describe('API suite (auth order then in-org)', () => {
         .expect(401);
       assert.strictEqual(res.body.status, 'error');
     });
+
+    it('POST /api/auth/login when user has no org returns 403, no token', async () => {
+      const noOrgEmail = `no-org-${Date.now()}@example.com`;
+      const sub = await SUBSCRIBER.create({
+        email: noOrgEmail,
+        is_subscribed: true,
+        subscribed_at: new Date(),
+      });
+      const hashed = await bcrypt.hash('Test123', SALT_ROUNDS);
+      const u = await USER.create({
+        personal_info: {
+          fullname: 'No Org User',
+          subscriber_id: sub._id,
+          password: hashed,
+          username: 'noorg' + Date.now().toString(36),
+        },
+      });
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: noOrgEmail, password: 'Test123' })
+        .expect(403);
+      assert.strictEqual(res.body.status, 'error');
+      assert.ok(
+        res.body.message
+          ?.toLowerCase()
+          .includes('not a member of any organization'),
+        'Message must contain "not a member of any organization"'
+      );
+      assert.ok(!res.body.data?.access_token);
+      assert.strictEqual(res.headers['set-cookie'], undefined);
+      await USER.deleteOne({ _id: u._id });
+      await SUBSCRIBER.deleteOne({ _id: sub._id });
+    });
   });
 
-  describe('3. Auth: signup and refresh', () => {
-    it('POST /api/auth/signup with valid body returns 201', async () => {
-      const email = `signup-${Date.now()}@example.com`;
+  describe('3. Auth: signup disabled (invite-only) and refresh', () => {
+    it('POST /api/auth/signup returns 403 (signup disabled)', async () => {
       const res = await request(app)
         .post('/api/auth/signup')
         .send({
           fullname: 'Signup Test',
-          email,
+          email: `signup-${Date.now()}@example.com`,
           password: 'Test123',
         })
-        .expect(201);
-      assert.strictEqual(res.body.status, 'success');
-      assert.ok(res.body.data.access_token);
-      assert.ok(res.body.data.user);
-      assert.deepStrictEqual(res.body.data.orgs, []);
+        .expect(403);
+      assert.strictEqual(res.body.status, 'error');
+      assert.ok(
+        res.body.message?.toLowerCase().includes('signup is disabled'),
+        'Message must contain "Signup is disabled"'
+      );
+      assert.ok(!res.body.data?.access_token);
     });
 
     it('POST /api/auth/refresh with cookie returns pre-org token', async () => {
@@ -206,6 +246,52 @@ describe('API suite (auth order then in-org)', () => {
         .expect(200);
       assert.ok(res.body.data.id);
       createdProjectId = res.body.data.id;
+    });
+  });
+
+  describe('5b. In-org: organization members and invite', () => {
+    it('GET /api/organization/members with org-scoped token returns 200 and list', async () => {
+      const res = await request(app)
+        .get('/api/organization/members')
+        .set('Authorization', `Bearer ${orgScopedToken}`)
+        .expect(200);
+      assert.strictEqual(res.body.status, 'success');
+      assert.ok(Array.isArray(res.body.data?.members));
+      assert.ok(Array.isArray(res.body.data?.pending_invites));
+    });
+
+    it('GET /api/organization/members without token returns 401', async () => {
+      await request(app).get('/api/organization/members').expect(401);
+    });
+
+    it('POST /api/organization/invite with org-scoped token creates invite', async () => {
+      const inviteEmail = `invite-${Date.now()}@example.com`;
+      const res = await request(app)
+        .post('/api/organization/invite')
+        .set('Authorization', `Bearer ${orgScopedToken}`)
+        .send({ email: inviteEmail, role: 'member' })
+        .expect(201);
+      assert.strictEqual(res.body.status, 'success');
+      assert.ok(res.body.data?.invite_id);
+      assert.strictEqual(res.body.data?.email, inviteEmail);
+      assert.strictEqual(res.body.data?.role, 'member');
+      assert.ok(res.body.data?.expires_at);
+    });
+
+    it('POST /api/organization/invite without token returns 401', async () => {
+      await request(app)
+        .post('/api/organization/invite')
+        .send({ email: 'a@b.com', role: 'member' })
+        .expect(401);
+    });
+
+    it('POST /api/organization/invite with invalid body returns 400', async () => {
+      const res = await request(app)
+        .post('/api/organization/invite')
+        .set('Authorization', `Bearer ${orgScopedToken}`)
+        .send({ role: 'member' })
+        .expect(400);
+      assert.strictEqual(res.body.status, 'error');
     });
   });
 
@@ -304,6 +390,174 @@ describe('API suite (auth order then in-org)', () => {
         .set('Authorization', `Bearer ${orgScopedToken}`)
         .expect(200);
       assert.strictEqual(res.body.status, 'success');
+    });
+  });
+
+  describe('11. Auth: accept-invite (public)', () => {
+    it('GET /api/auth/accept-invite without token returns 400', async () => {
+      const res = await request(app).get('/api/auth/accept-invite').expect(400);
+      assert.strictEqual(res.body.status, 'error');
+    });
+
+    it('GET /api/auth/accept-invite with invalid token returns 404', async () => {
+      const res = await request(app)
+        .get('/api/auth/accept-invite')
+        .query({ token: 'invalid-token-xyz' })
+        .expect(404);
+      assert.strictEqual(res.body.status, 'error');
+    });
+
+    it('GET /api/auth/accept-invite with valid token returns 200 and org_name', async () => {
+      const token = nanoid(32);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      await ORGANIZATION_INVITE.create({
+        email: `accept-get-${Date.now()}@example.com`,
+        org_id: defaultOrgId,
+        role: 'member',
+        token,
+        expires_at: expiresAt,
+        created_by: testUserId,
+        status: 'pending',
+      });
+      const res = await request(app)
+        .get('/api/auth/accept-invite')
+        .query({ token })
+        .expect(200);
+      assert.strictEqual(res.body.status, 'success');
+      assert.ok(res.body.data?.org_name);
+    });
+
+    it('POST /api/auth/accept-invite with invalid token returns 404', async () => {
+      const res = await request(app)
+        .post('/api/auth/accept-invite')
+        .send({
+          token: 'invalid-token-xyz',
+          password: 'Test123',
+          fullname: 'Test User',
+        })
+        .expect(404);
+      assert.strictEqual(res.body.status, 'error');
+    });
+
+    it('POST /api/auth/accept-invite with valid token creates user and returns access_token', async () => {
+      const token = nanoid(32);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      const inviteEmail = `accept-post-${Date.now()}@example.com`;
+      await ORGANIZATION_INVITE.create({
+        email: inviteEmail,
+        org_id: defaultOrgId,
+        role: 'viewer',
+        token,
+        expires_at: expiresAt,
+        created_by: testUserId,
+        status: 'pending',
+      });
+      const res = await request(app)
+        .post('/api/auth/accept-invite')
+        .send({
+          token,
+          password: 'Test123',
+          fullname: 'Accept Test User',
+        })
+        .expect(200);
+      assert.strictEqual(res.body.status, 'success');
+      assert.ok(res.body.data?.access_token);
+      assert.ok(res.body.data?.user);
+      assert.ok(Array.isArray(res.body.data?.orgs));
+      const sub = await SUBSCRIBER.findOne({ email: inviteEmail }).lean();
+      assert.ok(sub, 'Subscriber should be created for invited email');
+      const newUser = await USER.findOne({
+        'personal_info.subscriber_id': sub._id,
+      }).lean();
+      assert.ok(newUser, 'User should be created for accepted invite');
+      const member = await ORGANIZATION_MEMBER.findOne({
+        org_id: defaultOrgId,
+        user_id: newUser._id,
+      }).lean();
+      assert.ok(
+        member,
+        'OrganizationMember should be created for accepted invite'
+      );
+    });
+  });
+
+  describe('12. Organization request (public) POST /api/organization/request', () => {
+    it('success returns 201 and creates pending org', async () => {
+      const slug = `request-ok-${Date.now()}`;
+      const email = `request-ok-${Date.now()}@example.com`;
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'Requested Org',
+          slug,
+          requested_by_email: email,
+          requested_by_name: 'Requester Name',
+        })
+        .expect(201);
+      assert.strictEqual(res.body.status, 'success');
+      assert.match(res.body.message, /submitted|notified/i);
+      assert.ok(res.body.data?.org_id);
+      const org = await ORGANIZATION.findById(res.body.data.org_id).lean();
+      assert.ok(org);
+      assert.strictEqual(org.status, 'pending');
+      assert.strictEqual(org.requested_by_email, email);
+      assert.strictEqual(org.name, 'Requested Org');
+      assert.strictEqual(org.slug, slug);
+      await ORGANIZATION.findByIdAndDelete(res.body.data.org_id);
+    });
+
+    it('with existing slug returns 409', async () => {
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'Other Org',
+          slug: DEFAULT_ORG_SLUG,
+          requested_by_email: `other-${Date.now()}@example.com`,
+        })
+        .expect(409);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /slug|already exists/i);
+    });
+
+    it('duplicate pending email returns 409', async () => {
+      const email = `dup-pending-${Date.now()}@example.com`;
+      const slug1 = `dup-pending-a-${Date.now()}`;
+      await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'First Pending',
+          slug: slug1,
+          requested_by_email: email,
+        })
+        .expect(201);
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'Second Pending',
+          slug: `dup-pending-b-${Date.now()}`,
+          requested_by_email: email,
+        })
+        .expect(409);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /pending|email/i);
+      await ORGANIZATION.deleteOne({
+        status: 'pending',
+        requested_by_email: email,
+      });
+    });
+
+    it('validation missing required returns 400', async () => {
+      const res = await request(app)
+        .post('/api/organization/request')
+        .send({
+          name: 'No Slug',
+          requested_by_email: 'missing-slug@example.com',
+        })
+        .expect(400);
+      assert.strictEqual(res.body.status, 'error');
+      assert.match(res.body.message, /required|name|slug|email/i);
     });
   });
 });

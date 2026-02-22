@@ -8,16 +8,14 @@
  */
 
 import { sendResponse } from '../../utils/response.js';
-import { COOKIE_TOKEN, NODE_ENV } from '../../typings/index.js';
-import { SERVER_ENV } from '../../config/env.js';
+import { COOKIE_TOKEN } from '../../typings/index.js';
+import { REFRESH_COOKIE_OPTIONS } from './utils/index.js';
 
 const logout = async (req, res) => {
   try {
     res.clearCookie(COOKIE_TOKEN.REFRESH_TOKEN, {
-      httpOnly: true,
-      secure: SERVER_ENV === NODE_ENV.PRODUCTION,
-      sameSite: 'strict',
-      path: '/',
+      ...REFRESH_COOKIE_OPTIONS,
+      maxAge: 0,
     });
 
     return sendResponse(res, 200, 'Logged out successfully', {

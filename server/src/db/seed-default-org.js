@@ -32,6 +32,7 @@ async function seedDefaultOrg() {
       await ORGANIZATION.create({
         name: DEFAULT_ORG_NAME,
         slug: DEFAULT_ORG_SLUG,
+        status: 'active',
         enabled_features: [...FEATURE_LIST],
       });
       console.log(

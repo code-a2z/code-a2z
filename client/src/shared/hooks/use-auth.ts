@@ -28,6 +28,9 @@ import {
 } from '../utils/local';
 import { TOKEN_CONFIG } from '../../config/env';
 
+// Deduplicate initial auth load: only one refresh + select-org runs app-wide.
+let sharedAuthInitPromise: Promise<void> | null = null;
+
 export const useAuth = () => {
   const [token, setToken] = useAtom(TokenAtom);
   const user = useAtomValue(UserAtom);
@@ -48,6 +51,7 @@ export const useAuth = () => {
   }, [setToken]);
 
   const logout = useCallback(() => {
+    sharedAuthInitPromise = null;
     setToken(null);
     setUser(null);
     setSelectedOrgIdState(null);
@@ -92,86 +96,93 @@ export const useAuth = () => {
         return;
       }
 
-      // Reload with persisted org: refresh first to get pre-org token, then select-org
-      try {
-        const refreshResponse = await refreshToken();
-        if (
-          refreshResponse.status !== 'success' ||
-          !refreshResponse?.data?.access_token
-        ) {
-          clearToken();
-          clearSelectedOrgId();
-          setSelectedOrgIdState(null);
-          setPermissions([]);
-          setOrgFeatures([]);
-          setOrg(null);
-          if (storedOrgs?.length) setOrgsState(storedOrgs);
-          setInitialized(true);
-          return;
-        }
-        const newToken = refreshResponse.data.access_token;
-        setAccessToken(newToken);
-        setToken(newToken);
-
-        const response = await selectOrgApi({ org_id: storedOrgId });
-        if (response.status === 'success' && response.data) {
-          const d = response.data;
-          setAccessToken(d.access_token);
-          setToken(d.access_token);
-          setSelectedOrgIdState(d.org.org_id);
-          setSelectedOrgId(d.org.org_id);
-          setPermissions(d.permissions ?? []);
-          setOrgFeatures(d.org_features ?? []);
-          setOrg(d.org);
-          setUser(
-            d.user
-              ? {
-                  _id: d.user.id,
-                  personal_info: {
-                    fullname: d.user.fullname ?? '',
-                    username: d.user.username ?? '',
-                    profile_img: d.user.profile_img ?? '',
-                    subscriber_id: '',
-                    bio: '',
-                  },
-                  social_links: {
-                    youtube: '',
-                    instagram: '',
-                    facebook: '',
-                    x: '',
-                    github: '',
-                    linkedin: '',
-                    website: '',
-                  },
-                  account_info: { total_posts: 0, total_reads: 0 },
-                  role: d.role,
-                  project_ids: [],
-                  collaborated_projects_ids: [],
-                  collections_ids: [],
-                  joinedAt: '',
-                  updatedAt: '',
-                }
-              : null
-          );
-          try {
-            const meRes = await getCurrentUser();
-            if (meRes.status === 'success' && meRes.data) {
-              setUser(meRes.data);
-            }
-          } catch {
-            // Keep limited user from select-org
+      // Reload with persisted org: one refresh + select-org for the whole app
+      const runInit = async () => {
+        try {
+          const refreshResponse = await refreshToken();
+          if (
+            refreshResponse.status !== 'success' ||
+            !refreshResponse?.data?.access_token
+          ) {
+            clearToken();
+            clearSelectedOrgId();
+            setSelectedOrgIdState(null);
+            setPermissions([]);
+            setOrgFeatures([]);
+            setOrg(null);
+            if (storedOrgs?.length) setOrgsState(storedOrgs);
+            return;
           }
-        } else {
+          const newToken = refreshResponse.data.access_token;
+          setAccessToken(newToken);
+          setToken(newToken);
+
+          const response = await selectOrgApi({ org_id: storedOrgId });
+          if (response.status === 'success' && response.data) {
+            const d = response.data;
+            setAccessToken(d.access_token);
+            setToken(d.access_token);
+            setSelectedOrgIdState(d.org.org_id);
+            setSelectedOrgId(d.org.org_id);
+            setPermissions(d.permissions ?? []);
+            setOrgFeatures(d.org_features ?? []);
+            setOrg(d.org);
+            setUser(
+              d.user
+                ? {
+                    _id: d.user.id,
+                    personal_info: {
+                      fullname: d.user.fullname ?? '',
+                      username: d.user.username ?? '',
+                      profile_img: d.user.profile_img ?? '',
+                      subscriber_id: '',
+                      bio: '',
+                    },
+                    social_links: {
+                      youtube: '',
+                      instagram: '',
+                      facebook: '',
+                      x: '',
+                      github: '',
+                      linkedin: '',
+                      website: '',
+                    },
+                    account_info: { total_posts: 0, total_reads: 0 },
+                    role: d.role,
+                    project_ids: [],
+                    collaborated_projects_ids: [],
+                    collections_ids: [],
+                    joinedAt: '',
+                    updatedAt: '',
+                  }
+                : null
+            );
+            try {
+              const meRes = await getCurrentUser();
+              if (meRes.status === 'success' && meRes.data) {
+                setUser(meRes.data);
+              }
+            } catch {
+              // Keep limited user from select-org
+            }
+          } else {
+            clearSelectedOrgId();
+            setSelectedOrgIdState(null);
+            if (storedOrgs?.length) setOrgsState(storedOrgs);
+          }
+        } catch {
           clearSelectedOrgId();
           setSelectedOrgIdState(null);
           if (storedOrgs?.length) setOrgsState(storedOrgs);
         }
-      } catch {
-        clearSelectedOrgId();
-        setSelectedOrgIdState(null);
-        if (storedOrgs?.length) setOrgsState(storedOrgs);
-      }
+      };
 
+      if (sharedAuthInitPromise) {
+        await sharedAuthInitPromise;
+      } else {
+        sharedAuthInitPromise = runInit();
+        await sharedAuthInitPromise;
+      }
       setInitialized(true);
     };
 

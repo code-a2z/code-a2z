@@ -6,6 +6,7 @@ import NotesIcon from '@mui/icons-material/Notes';
 import CodeIcon from '@mui/icons-material/Code';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsIcon from '@mui/icons-material/Settings';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { SideBarItemsType } from '../typings';
 import {
@@ -30,6 +31,7 @@ const useSidebar = () => {
   const hasChats = useHasPermission('chats', 'read');
   const hasNotes = useHasPermission('notes', 'read');
   const hasCode = useHasPermission('code', 'read');
+  const hasAdminPanel = useHasPermission('admin_panel', 'access');
 
   const handleSwitchOrg = useCallback(async () => {
     const switched = await switchOrg();
@@ -92,6 +94,13 @@ const useSidebar = () => {
         title: 'Settings',
         screenName: ROUTES_PAGE_V1.SETTINGS,
       },
+      {
+        icon: AdminPanelSettingsIcon,
+        path: ROUTES_V1.ADMIN,
+        title: 'Admin',
+        screenName: ROUTES_PAGE_V1.ADMIN,
+        hasAccess: hasAdminPanel,
+      },
     ];
 
     const secondaryItems: SideBarItemsType[] = [
@@ -114,7 +123,14 @@ const useSidebar = () => {
       items: items.filter(item => !item.disable && item.hasAccess !== false),
       secondaryItems: secondaryItems.filter(({ disable }) => !disable),
     };
-  }, [handleLogoutClick, handleSwitchOrg, hasChats, hasNotes, hasCode]);
+  }, [
+    handleLogoutClick,
+    handleSwitchOrg,
+    hasChats,
+    hasNotes,
+    hasCode,
+    hasAdminPanel,
+  ]);
 
   return {
     showExpandedView,

@@ -48,3 +48,41 @@ export interface SelectOrgResponseData {
   org_features: string[];
   org: { org_id: string; name: string; slug: string };
 }
+
+/** GET accept-invite response (org name for valid token). */
+export interface AcceptInviteInfoResponseData {
+  org_name: string;
+}
+
+/** POST accept-invite payload. */
+export interface AcceptInvitePayload {
+  token: string;
+  password: string;
+  fullname: string;
+}
+
+/** POST accept-invite response (same as login: user, orgs, access_token). */
+export interface AcceptInviteResponseData {
+  user: AuthUser;
+  orgs: LoginOrgItem[];
+  access_token: string;
+}
+
+/** GET set-password response (org name for valid token). */
+export interface SetPasswordInfoResponseData {
+  org_name: string;
+}
+
+/** POST set-password-after-approval payload. */
+export interface SetPasswordAfterApprovalPayload {
+  token: string;
+  password: string;
+  fullname?: string;
+}
+
+/** POST set-password-after-approval response (same as login). */
+export interface SetPasswordAfterApprovalResponseData {
+  user: AuthUser;
+  orgs: LoginOrgItem[];
+  access_token: string;
+}
