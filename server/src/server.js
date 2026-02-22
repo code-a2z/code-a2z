@@ -1,6 +1,4 @@
-import connectDB from './config/db.js';
 import app from './app.js';
 
-connectDB();
-
+// DB connection is awaited in index.js before the HTTP server starts listening.
 export default app;
