@@ -49,11 +49,14 @@ const login = async (req, res) => {
     }
 
     const memberships = await ORGANIZATION_MEMBER.find({ user_id: user._id })
-      .populate('org_id', 'name slug')
+      .populate('org_id', 'name slug status')
       .lean();
 
     const orgs = memberships
-      .filter(m => m.org_id)
+      .filter(
+        m =>
+          m.org_id && (m.org_id.status === 'active' || m.org_id.status == null)
+      )
       .map(m => ({
         org_id: m.org_id._id,
         name: m.org_id.name,

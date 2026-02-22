@@ -57,7 +57,7 @@ const selectOrg = async (req, res) => {
       user_id: userId,
       org_id,
     })
-      .populate('org_id', 'name slug enabled_features')
+      .populate('org_id', 'name slug enabled_features status')
       .lean();
 
     if (!membership || !membership.org_id) {
@@ -69,6 +69,14 @@ const selectOrg = async (req, res) => {
     }
 
     const org = membership.org_id;
+    const orgStatus = org.status;
+    if (orgStatus && orgStatus !== 'active') {
+      return sendResponse(
+        res,
+        403,
+        'This organization is not available for access'
+      );
+    }
     const role = membership.role;
     const enabledFeatures = org.enabled_features || [];
 
