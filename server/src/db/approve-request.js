@@ -50,27 +50,32 @@ async function main() {
     process.exit(1);
   }
 
-  if (email) {
-    const org = await ORGANIZATION.findOne({
-      status: 'pending',
-      requested_by_email: email,
-    })
-      .select('_id')
-      .lean();
-    if (!org) {
-      console.error(
-        `No pending organization request found for email: ${email}`
-      );
-      process.exit(1);
-    }
-    orgId = String(org._id);
-  }
-
   try {
     await mongoose.connect(MONGODB_URL, { autoIndex: true });
   } catch (err) {
     console.error('Database connection failed:', err.message);
     process.exit(1);
+  }
+
+  if (email) {
+    try {
+      const org = await ORGANIZATION.findOne({
+        status: 'pending',
+        requested_by_email: email,
+      })
+        .select('_id')
+        .lean();
+      if (!org) {
+        console.error(
+          `No pending organization request found for email: ${email}`
+        );
+        process.exit(1);
+      }
+      orgId = String(org._id);
+    } catch (err) {
+      console.error('Lookup failed:', err.message);
+      process.exit(1);
+    }
   }
 
   try {
