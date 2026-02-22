@@ -4,6 +4,9 @@ export const ROUTE_SELECT_ORG = '/select-org';
 /** Public route to accept org invite (token in query). */
 export const ROUTE_ACCEPT_INVITE = '/accept-invite';
 
+/** Public route to request a new organization. */
+export const ROUTE_REQUEST_ORG = '/request-org';
+
 export enum ROUTES_PAGE_V1 {
   HOME = 'home',
   CHATS = 'chats',

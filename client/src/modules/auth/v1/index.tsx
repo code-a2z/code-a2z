@@ -1,10 +1,12 @@
-import { Box, styled, Typography } from '@mui/material';
+import { Box, Link, styled, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import InputBox from '../../../shared/components/atoms/input-box';
 import EmailIcon from '@mui/icons-material/Email';
 import PasswordIcon from '@mui/icons-material/Password';
 import LoginIcon from '@mui/icons-material/Login';
 import A2ZButton from '../../../shared/components/atoms/button';
 import { useUserAuthForm } from './hooks';
+import { ROUTE_REQUEST_ORG } from '../../../app/routes/constants/routes';
 
 const StyledSection = styled('section')(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -78,6 +80,11 @@ const UserAuthForm = () => {
             Login
             <LoginIcon />
           </A2ZButton>
+          <Typography sx={{ mt: 2 }}>
+            <Link component={RouterLink} to={ROUTE_REQUEST_ORG}>
+              Request organization
+            </Link>
+          </Typography>
         </Box>
       </StyledForm>
     </StyledSection>
