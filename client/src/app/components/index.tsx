@@ -12,6 +12,9 @@ export const LoginLazyComponent = lazy(() => import('../../modules/auth/v1'));
 export const AcceptInviteLazyComponent = lazy(
   () => import('../../modules/auth/v1/accept-invite-page')
 );
+export const RequestOrgLazyComponent = lazy(
+  () => import('../../modules/auth/v1/request-org-page')
+);
 export const HomePageLazyComponent = lazy(
   () => import('../../modules/home/v1')
 );
