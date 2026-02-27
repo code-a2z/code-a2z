@@ -171,7 +171,8 @@ Be part of our developer space where we brainstorm, debug, and build together.
 > All discussions and contributions follow our [**Code of Conduct**](./CODE_OF_CONDUCT.md).  
 > Respect, collaboration, and professionalism are non-negotiable values of the **Code A2Z** community.
 
-###  Contributors  
+###  Contributors 
+---
 
 Thanks to these amazing people who have contributed to **code-a2z** ✨  
 
@@ -181,16 +182,5 @@ Thanks to these amazing people who have contributed to **code-a2z** ✨
   </a>
 </div>
 
-<br/>
-
-###  Project Support
-
-<div align="center">
-
-[![Stars](https://img.shields.io/github/stars/code-a2z/code-a2z?style=social)](https://github.com/code-a2z/code-a2z/stargazers)
-&nbsp;&nbsp;
-[![Forks](https://img.shields.io/github/forks/code-a2z/code-a2z?style=social)](https://github.com/code-a2z/code-a2z/network/members)
-
-</div>
 
 <a href="#top"><img src="https://img.shields.io/badge/⬆-Back%20to%20Top-red?style=for-the-badge" align="right"/></a>
