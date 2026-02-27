@@ -172,7 +172,6 @@ Be part of our developer space where we brainstorm, debug, and build together.
 > Respect, collaboration, and professionalism are non-negotiable values of the **Code A2Z** community.
 
 ###  Contributors 
----
 
 Thanks to these amazing people who have contributed to **code-a2z** ✨  
 
