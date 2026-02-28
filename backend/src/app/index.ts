@@ -1,8 +1,12 @@
+// ENTRY POINT - IN PRODUCTION 
 import express from 'express';
 import type { Request, Response } from 'express';
 import apiRouter from './api/index.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { connectMongoDB } from '../infra/databases/mongodb.js';
+
+await connectMongoDB();
 
 const app = express();
 

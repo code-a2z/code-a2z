@@ -1,3 +1,4 @@
+// ENTRY POINT - IN DEVELOPMENT 
 import app from './app/index.js';
 import envConfig from './config/env.js';
 
