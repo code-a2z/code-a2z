@@ -5,8 +5,8 @@ on:
     types: [opened, edited, reopened]
   issue_comment:
     types: [created]
-  schedule:
-    - cron: '0 0 * * *' # Run daily at midnight UTC
+  # schedule:
+  #   - cron: '0 0 * * *' # (Paused) daily at midnight UTC
 
 permissions:
   contents: read # Required for checkout
