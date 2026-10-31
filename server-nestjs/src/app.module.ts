@@ -1,24 +1,17 @@
-
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { DatabaseModule } from './database/database.module.js';
 import { OrganizationsModule } from './organizations/organizations.module.js';
 import { UsersModule } from './users/users.module.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
+    ConfigModule.forRoot({ // read mongodb url from env.
       isGlobal: true,
     }),
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        uri: config.getOrThrow<string>('MONGODB_URL'),
-      }),
-    }),
+    DatabaseModule, // provides database service.
     OrganizationsModule,
     UsersModule,
   ],

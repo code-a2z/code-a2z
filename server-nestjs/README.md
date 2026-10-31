@@ -19,6 +19,7 @@ From the repository root:
 cd server-nestjs
 npm install
 ```
+
 ## Database Setup
 
 1. Make sure MongoDB is running on port 27017.
@@ -29,14 +30,20 @@ npm install
 3. Update MONGODB_URL in .env if needed.
 4. Start the backend using npm run start:dev.
 
-The NestJS backend currently uses five MongoDB models:
+The NestJS backend uses the official MongoDB Node.js driver for five document
+types:
+
 - User
 - Subscriber
 - Organization
 - Organization Member
 - Set Password Token
 
-The collection names and schemas follow the existing Express backend.
+Native repositories create the same collections and indexes as the existing
+Express backend. Repository writes are validated at runtime and apply the same
+normalization, defaults, and timestamp field names as the Express Mongoose
+schemas. Validation remains in the NestJS application rather than at the
+MongoDB collection level so existing Express records remain compatible.
 
 ## Development
 
@@ -61,9 +68,9 @@ npm run test
 ## Current Scope
 
 - NestJS and TypeScript setup
-- MongoDB connection using Mongoose
-- User and organization database models
-- Schema validation and index tests
+- MongoDB connection using the official Node.js driver
+- Native user and organization repositories
+- Runtime document validation and repository index tests
 
 Authentication, organization onboarding, and frontend
 integration will be implemented in future PRs.
