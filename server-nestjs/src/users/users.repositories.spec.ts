@@ -17,10 +17,12 @@ describe('native user repositories', () => {
   const insertOne = vi.fn().mockResolvedValue({ insertedId });
   const createIndexes = vi.fn().mockResolvedValue([]);
   const findOne = vi.fn().mockResolvedValue(null);
+  const updateOne = vi.fn().mockResolvedValue({ matchedCount: 1 });
   const collection = vi.fn().mockReturnValue({
     createIndexes,
     findOne,
     insertOne,
+    updateOne,
   });
   const database = {
     getDb: () => ({ collection }),
@@ -120,6 +122,30 @@ describe('native user repositories', () => {
       DocumentValidationError,
     );
     expect(insertOne).not.toHaveBeenCalled();
+  });
+
+  it('finds a user by subscriber and updates only their password', async () => {
+    const repository = new UsersRepository(database);
+    const subscriberId = new ObjectId();
+    const userId = new ObjectId();
+
+    await repository.findBySubscriberId(subscriberId);
+    expect(findOne).toHaveBeenCalledWith({
+      'personal_info.subscriber_id': subscriberId,
+    });
+
+    await expect(repository.updatePassword(userId, 'new-hash')).resolves.toBe(
+      true,
+    );
+    expect(updateOne).toHaveBeenCalledWith(
+      { _id: userId },
+      {
+        $set: {
+          'personal_info.password': 'new-hash',
+          updatedAt: new Date('2026-01-02T03:04:05.000Z'),
+        },
+      },
+    );
   });
 
   it('preserves subscriber fields and defaults before insert', async () => {

@@ -17,8 +17,11 @@ describe('native organization repositories', () => {
   const insertOne = vi.fn().mockResolvedValue({ insertedId });
   const createIndexes = vi.fn().mockResolvedValue([]);
   const findOne = vi.fn().mockResolvedValue(null);
+  const toArray = vi.fn().mockResolvedValue([]);
+  const find = vi.fn().mockReturnValue({ toArray });
   const collection = vi.fn().mockReturnValue({
     createIndexes,
+    find,
     findOne,
     insertOne,
   });
@@ -132,6 +135,20 @@ describe('native organization repositories', () => {
 
     expect(result).toBe(legacyOrganization);
     expect(result?.status).toBe('rejected');
+  });
+
+  it('finds organizations and memberships needed for auth', async () => {
+    const userId = new ObjectId();
+    const organizationIds = [new ObjectId(), new ObjectId()];
+
+    await new OrganizationMembersRepository(database).findByUserId(userId);
+    expect(find).toHaveBeenCalledWith({ user_id: userId });
+
+    await new OrganizationsRepository(database).findByIds(organizationIds);
+    expect(find).toHaveBeenLastCalledWith({
+      _id: { $in: organizationIds },
+    });
+    expect(toArray).toHaveBeenCalledTimes(2);
   });
 
   it('validates organization members and applies timestamps', async () => {

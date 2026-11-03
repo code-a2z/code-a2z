@@ -40,6 +40,26 @@ export class UsersRepository implements OnApplicationBootstrap {
     });
   }
 
+  findBySubscriberId(subscriberId: ObjectId): Promise<WithId<User> | null> {
+    return this.collection.findOne({
+      'personal_info.subscriber_id': subscriberId,
+    });
+  }
+
+  async updatePassword(userId: ObjectId, password: string): Promise<boolean> {
+    const result = await this.collection.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          'personal_info.password': password,
+          updatedAt: new Date(),
+        },
+      },
+    );
+
+    return result.matchedCount === 1;
+  }
+
   private get collection(): Collection<User> {
     return this.database.getDb().collection<User>(COLLECTION_NAMES.USERS);
   }
