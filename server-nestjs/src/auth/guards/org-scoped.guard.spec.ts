@@ -29,7 +29,7 @@ describe('OrgScopedGuard', () => {
     findById: vi.fn(),
   };
   const rbac = {
-    getPermissions: vi.fn().mockReturnValue([PERMISSIONS.ARTICLES_READ]),
+    getPermissions: vi.fn().mockReturnValue([PERMISSIONS.COLLABORATION_READ]),
   };
 
   const createGuard = () =>
@@ -50,13 +50,13 @@ describe('OrgScopedGuard', () => {
         org_id: organizationId.toHexString(),
         role: 'owner',
         permissions: [PERMISSIONS.ORG_MANAGE],
-        org_features: ['articles'],
+        org_features: ['collaboration'],
       },
     } as unknown as AuthenticatedRequest;
     members.findByUserAndOrganization.mockResolvedValue({ role: 'viewer' });
     organizations.findById.mockResolvedValue({
       status: 'active',
-      enabled_features: ['articles'],
+      enabled_features: ['collaboration'],
     });
   });
 
@@ -65,12 +65,12 @@ describe('OrgScopedGuard', () => {
 
     expect(request.user).toMatchObject({
       role: 'viewer',
-      permissions: [PERMISSIONS.ARTICLES_READ],
-      org_features: ['articles'],
+      permissions: [PERMISSIONS.COLLABORATION_READ],
+      org_features: ['collaboration'],
     });
     expect(rbac.getPermissions).toHaveBeenCalledWith(
       'viewer',
-      ['articles'],
+      ['collaboration'],
       organizationId.toHexString(),
     );
     expect(hasLiveAuthorizationBeenVerified(request)).toBe(true);

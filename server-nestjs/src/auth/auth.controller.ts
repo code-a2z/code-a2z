@@ -22,7 +22,7 @@ import { AuthRateLimitGuard } from './guards/auth-rate-limit.guard.js';
 import { PreOrgGuard } from './guards/pre-org.guard.js';
 import { JwtTokenService } from './jwt-token.service.js';
 
-@Controller(['api/v1/auth', 'api/auth'])
+@Controller('v1/auth')
 export class AuthController {
   constructor(
     private readonly auth: AuthService,
@@ -81,6 +81,11 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) response: Response) {
+    response.cookie(this.tokens.refreshCookieName, '', {
+      ...this.tokens.getRefreshCookieOptions(),
+      maxAge: 0,
+    });
+
     response.clearCookie(
       this.tokens.refreshCookieName,
       this.tokens.getClearRefreshCookieOptions(),

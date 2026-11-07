@@ -18,13 +18,13 @@ describe('PermissionGuard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    reflector.getAllAndOverride.mockReturnValue(PERMISSIONS.ARTICLES_READ);
+    reflector.getAllAndOverride.mockReturnValue(PERMISSIONS.COLLABORATION_READ);
     request = {
       headers: { 'x-live-authorization-verified': 'true' },
       body: { liveAuthorizationVerified: true },
       user: {
         token_type: 'org_scoped',
-        permissions: [PERMISSIONS.ARTICLES_READ],
+        permissions: [PERMISSIONS.COLLABORATION_READ],
         liveAuthorizationVerified: true,
       },
     } as unknown as AuthenticatedRequest;
@@ -45,7 +45,7 @@ describe('PermissionGuard', () => {
 
   it('rejects a missing permission', () => {
     markLiveAuthorizationVerified(request);
-    reflector.getAllAndOverride.mockReturnValue(PERMISSIONS.ARTICLES_WRITE);
+    reflector.getAllAndOverride.mockReturnValue(PERMISSIONS.COLLABORATION_WRITE);
     const guard = new PermissionGuard(reflector as unknown as Reflector);
 
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);

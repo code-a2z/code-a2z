@@ -48,15 +48,15 @@ describe('JwtTokenService', () => {
       ...identity,
       org_id: new ObjectId().toHexString(),
       role: 'member',
-      permissions: ['articles:read'],
-      org_features: ['articles'],
+      permissions: ['collaboration:read'],
+      org_features: ['collaboration'],
     });
 
     expect(service.verifyAccessToken(token)).toMatchObject({
       token_type: 'org_scoped',
       role: 'member',
-      permissions: ['articles:read'],
-      org_features: ['articles'],
+      permissions: ['collaboration:read'],
+      org_features: ['collaboration'],
     });
   });
 

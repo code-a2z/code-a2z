@@ -97,7 +97,7 @@ describe('AuthController (e2e)', () => {
     name: 'Test Organization',
     slug: 'test-organization',
     status,
-    enabled_features: ['articles'],
+    enabled_features: ['collaboration'],
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -153,7 +153,7 @@ describe('AuthController (e2e)', () => {
 
   it('logs in, sets an HTTP-only refresh cookie, and allows zero organizations', async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/v1/auth/login')
       .send({ email: 'member@example.com', password: 'Valid123' })
       .expect(200);
 
@@ -193,7 +193,7 @@ describe('AuthController (e2e)', () => {
       arrange();
 
       const response = await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
+        .post('/v1/auth/login')
         .send({ email: 'member@example.com', password })
         .expect(401);
 
@@ -207,28 +207,28 @@ describe('AuthController (e2e)', () => {
   it('refreshes a session cookie and rejects missing or wrong tokens', async () => {
     const agent = request.agent(app.getHttpServer());
     const login = await agent
-      .post('/api/v1/auth/login')
+      .post('/v1/auth/login')
       .send({ email: 'member@example.com', password: 'Valid123' })
       .expect(200);
 
-    const refreshed = await agent.post('/api/v1/auth/refresh').expect(200);
+    const refreshed = await agent.post('/v1/auth/refresh').expect(200);
     expect(refreshed.body.data.access_token).toEqual(expect.any(String));
 
-    await request(app.getHttpServer()).post('/api/v1/auth/refresh').expect(401);
+    await request(app.getHttpServer()).post('/v1/auth/refresh').expect(401);
     await request(app.getHttpServer())
-      .post('/api/v1/auth/refresh')
+      .post('/v1/auth/refresh')
       .set('Cookie', `refresh_token=${login.body.data.access_token}`)
       .expect(401);
   });
 
   it('returns sessions with and without active organizations', async () => {
     const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/v1/auth/login')
       .send({ email: 'member@example.com', password: 'Valid123' });
     const accessToken = login.body.data.access_token as string;
 
     await request(app.getHttpServer())
-      .get('/api/v1/auth/session')
+      .get('/v1/auth/session')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200)
       .expect(({ body }) => {
@@ -240,7 +240,7 @@ describe('AuthController (e2e)', () => {
     organizations.findByIds.mockResolvedValue([organization()]);
 
     await request(app.getHttpServer())
-      .get('/api/v1/auth/session')
+      .get('/v1/auth/session')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200)
       .expect(({ body }) => {
@@ -256,11 +256,11 @@ describe('AuthController (e2e)', () => {
 
   it('selects an active membership and filters disabled feature permissions', async () => {
     const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/v1/auth/login')
       .send({ email: 'member@example.com', password: 'Valid123' });
 
     const response = await request(app.getHttpServer())
-      .post('/api/v1/auth/select-org')
+      .post('/v1/auth/select-org')
       .set('Authorization', `Bearer ${login.body.data.access_token}`)
       .send({ org_id: organizationId.toHexString() })
       .expect(200);
@@ -268,15 +268,15 @@ describe('AuthController (e2e)', () => {
     expect(response.body.data).toMatchObject({
       access_token: expect.any(String),
       role: 'member',
-      permissions: ['articles:read', 'articles:write', 'articles:delete'],
-      org_features: ['articles'],
+      permissions: ['collaboration:read', 'collaboration:write'],
+      org_features: ['collaboration'],
       org: { org_id: organizationId.toHexString() },
     });
-    expect(response.body.data.permissions).not.toContain('chats:read');
+    expect(response.body.data.permissions).not.toContain('notifications:read');
     expect(response.body.data.permissions).not.toContain('admin_panel:access');
 
     await request(app.getHttpServer())
-      .post('/api/v1/auth/select-org')
+      .post('/v1/auth/select-org')
       .set('Authorization', `Bearer ${response.body.data.access_token}`)
       .send({ org_id: organizationId.toHexString() })
       .expect(403);
@@ -284,18 +284,18 @@ describe('AuthController (e2e)', () => {
 
   it('rejects invalid org ids, non-members, and client-supplied authorization', async () => {
     const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/v1/auth/login')
       .send({ email: 'member@example.com', password: 'Valid123' });
     const token = login.body.data.access_token as string;
 
     await request(app.getHttpServer())
-      .post('/api/v1/auth/select-org')
+      .post('/v1/auth/select-org')
       .set('Authorization', `Bearer ${token}`)
       .send({ org_id: 'invalid' })
       .expect(400);
 
     await request(app.getHttpServer())
-      .post('/api/v1/auth/select-org')
+      .post('/v1/auth/select-org')
       .set('Authorization', `Bearer ${token}`)
       .send({
         org_id: organizationId.toHexString(),
@@ -306,7 +306,7 @@ describe('AuthController (e2e)', () => {
 
     organizationMembers.findByUserAndOrganization.mockResolvedValue(null);
     await request(app.getHttpServer())
-      .post('/api/v1/auth/select-org')
+      .post('/v1/auth/select-org')
       .set('Authorization', `Bearer ${token}`)
       .send({ org_id: organizationId.toHexString() })
       .expect(403);
@@ -314,8 +314,14 @@ describe('AuthController (e2e)', () => {
 
   it('clears the refresh cookie and returns client cleanup hints', async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/v1/auth/logout')
+      .post('/v1/auth/logout')
       .expect(200);
+
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('Max-Age=0'),
+      ]),
+    );
 
     expect(response.headers['set-cookie']?.[0]).toContain('refresh_token=;');
     expect(response.body.data.client_clear_hint).toEqual({
@@ -326,12 +332,12 @@ describe('AuthController (e2e)', () => {
 
   it('changes the authenticated user password and rejects a wrong current password', async () => {
     const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/v1/auth/login')
       .send({ email: 'member@example.com', password: 'Valid123' });
     const token = login.body.data.access_token as string;
 
     await request(app.getHttpServer())
-      .patch('/api/v1/auth/change-password')
+      .patch('/v1/auth/change-password')
       .set('Authorization', `Bearer ${token}`)
       .send({
         current_password: 'Valid123',
@@ -345,7 +351,7 @@ describe('AuthController (e2e)', () => {
     );
 
     await request(app.getHttpServer())
-      .patch('/api/v1/auth/change-password')
+      .patch('/v1/auth/change-password')
       .set('Authorization', `Bearer ${token}`)
       .send({
         current_password: 'Wrong123',
@@ -354,7 +360,7 @@ describe('AuthController (e2e)', () => {
       .expect(403);
 
     await request(app.getHttpServer())
-      .patch('/api/v1/auth/change-password')
+      .patch('/v1/auth/change-password')
       .set('Authorization', `Bearer ${token}`)
       .send({
         current_password: 'Valid123',
@@ -363,7 +369,7 @@ describe('AuthController (e2e)', () => {
       .expect(400);
 
     await request(app.getHttpServer())
-      .patch('/api/v1/auth/change-password')
+      .patch('/v1/auth/change-password')
       .set('Authorization', `Bearer ${token}`)
       .send({
         current_password: 'Valid123',
@@ -375,15 +381,10 @@ describe('AuthController (e2e)', () => {
 
   it('rejects invalid access tokens', async () => {
     await request(app.getHttpServer())
-      .get('/api/v1/auth/session')
+      .get('/v1/auth/session')
       .set('Authorization', 'Bearer invalid-token')
       .expect(401);
   });
 
-  it('supports the frontend-compatible /api/auth alias', async () => {
-    await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ email: 'member@example.com', password: 'Valid123' })
-      .expect(200);
-  });
+
 });

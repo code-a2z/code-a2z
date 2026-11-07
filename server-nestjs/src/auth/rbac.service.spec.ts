@@ -9,13 +9,12 @@ describe('RBAC helpers', () => {
   it('maps roles to their expected permissions', () => {
     const service = new RbacService(new ConfigService({}));
 
-    expect(service.getPermissions('viewer', ['articles'], 'org-id')).toEqual([
-      PERMISSIONS.ARTICLES_READ,
+    expect(service.getPermissions('viewer', ['collaboration'], 'org-id')).toEqual([
+      PERMISSIONS.COLLABORATION_READ,
     ]);
-    expect(service.getPermissions('member', ['articles'], 'org-id')).toEqual([
-      PERMISSIONS.ARTICLES_READ,
-      PERMISSIONS.ARTICLES_WRITE,
-      PERMISSIONS.ARTICLES_DELETE,
+    expect(service.getPermissions('member', ['collaboration'], 'org-id')).toEqual([
+      PERMISSIONS.COLLABORATION_READ,
+      PERMISSIONS.COLLABORATION_WRITE
     ]);
     expect(service.getPermissions('admin', [], 'org-id')).toEqual([
       PERMISSIONS.ORG_MANAGE,
@@ -28,13 +27,16 @@ describe('RBAC helpers', () => {
     expect(
       filterPermissionsByFeatures(
         [
-          PERMISSIONS.ARTICLES_READ,
-          PERMISSIONS.CHATS_READ,
+          PERMISSIONS.COLLABORATION_READ,
+          PERMISSIONS.NOTIFICATIONS_READ,
           PERMISSIONS.ORG_MANAGE,
         ],
-        ['articles'],
+        ['collaboration'],
       ),
-    ).toEqual([PERMISSIONS.ARTICLES_READ, PERMISSIONS.ORG_MANAGE]);
+    ).toEqual([
+      PERMISSIONS.COLLABORATION_READ,
+      PERMISSIONS.ORG_MANAGE,
+    ]);
   });
 
   it('grants admin panel only to the platform organization owner', () => {

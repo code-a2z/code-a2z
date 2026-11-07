@@ -53,7 +53,13 @@ their expiration settings. `CLIENT_ORIGIN` is an exact, comma-separated CORS
 allowlist; it is required in production because credentialed CORS must not use
 a permissive origin.
 
-The implemented authentication routes are available under `/api/v1/auth`:
+Login returns a pre-organization access token and stores its
+refresh token in an HTTP-only cookie. Selecting an active
+organization returns an organization-scoped access token whose
+permissions are derived from the current membership role and
+enabled organization features.
+
+The implemented authentication routes are available under `/v1/auth`:
 
 - `POST /login`
 - `POST /refresh`
@@ -62,11 +68,6 @@ The implemented authentication routes are available under `/api/v1/auth`:
 - `POST /logout`
 - `PATCH /change-password`
 
-The existing `/api/auth` paths are also exposed as a temporary compatibility
-alias for the current frontend. Login returns a pre-organization access token
-and stores its refresh token in an HTTP-only cookie. Selecting an active
-organization returns an organization-scoped access token whose permissions are
-derived from the current membership role and enabled organization features.
 
 Logout clears the browser refresh-token cookie and tells the client to clear
 its in-memory access token and selected organization. It does not revoke an
