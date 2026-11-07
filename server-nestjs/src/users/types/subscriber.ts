@@ -3,6 +3,7 @@ export interface Subscriber {
   is_subscribed: boolean;
   subscribed_at: Date;
   unsubscribed_at: Date | null;
+  email_verified_at?: Date | null;
   joinedAt: Date;
   updatedAt: Date;
 }
