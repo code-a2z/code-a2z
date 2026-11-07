@@ -50,6 +50,10 @@ export class OrganizationMembersRepository implements OnApplicationBootstrap {
     });
   }
 
+  findByUserId(userId: ObjectId): Promise<WithId<OrganizationMember>[]> {
+    return this.collection.find({ user_id: userId }).toArray();
+  }
+
   private get collection(): Collection<OrganizationMember> {
     return this.database
       .getDb()

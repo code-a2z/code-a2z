@@ -46,6 +46,14 @@ export class OrganizationsRepository implements OnApplicationBootstrap {
     return this.collection.findOne({ slug: slug.trim().toLowerCase() });
   }
 
+  findByIds(ids: ObjectId[]): Promise<WithId<Organization>[]> {
+    if (ids.length === 0) {
+      return Promise.resolve([]);
+    }
+
+    return this.collection.find({ _id: { $in: ids } }).toArray();
+  }
+
   private get collection(): Collection<Organization> {
     return this.database
       .getDb()

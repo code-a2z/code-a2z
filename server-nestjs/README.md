@@ -28,7 +28,8 @@ npm install
    cp .env.example .env
 
 3. Update MONGODB_URL in .env if needed.
-4. Start the backend using npm run start:dev.
+4. Configure the required JWT settings shown in `.env.example`.
+5. Start the backend using npm run start:dev.
 
 The NestJS backend uses the official MongoDB Node.js driver for five document
 types:
@@ -44,6 +45,34 @@ Express backend. Repository writes are validated at runtime and apply the same
 normalization, defaults, and timestamp field names as the Express Mongoose
 schemas. Validation remains in the NestJS application rather than at the
 MongoDB collection level so existing Express records remain compatible.
+
+## Authentication configuration
+
+The server will not start without separate access and refresh JWT secrets and
+their expiration settings. `CLIENT_ORIGIN` is an exact, comma-separated CORS
+allowlist; it is required in production because credentialed CORS must not use
+a permissive origin.
+
+Login returns a pre-organization access token and stores its
+refresh token in an HTTP-only cookie. Selecting an active
+organization returns an organization-scoped access token whose
+permissions are derived from the current membership role and
+enabled organization features.
+
+The implemented authentication routes are available under `/v1/auth`:
+
+- `POST /login`
+- `POST /refresh`
+- `GET /session`
+- `POST /select-org`
+- `POST /logout`
+- `PATCH /change-password`
+
+
+Logout clears the browser refresh-token cookie and tells the client to clear
+its in-memory access token and selected organization. It does not revoke an
+access or refresh JWT that was copied before logout; server-side token
+revocation and refresh-token rotation are not part of this PR.
 
 ## Development
 
@@ -63,6 +92,8 @@ npm run build
 
 ```bash
 npm run test
+npm run test:e2e
+npm run lint
 ```
 
 ## Current Scope
@@ -71,6 +102,13 @@ npm run test
 - MongoDB connection using the official Node.js driver
 - Native user and organization repositories
 - Runtime document validation and repository index tests
+- Login, refresh, session, organization selection, logout, and password change
+- Pre-organization and organization-scoped JWT guards
+- Live organization membership, feature, and permission checks
 
-Authentication, organization onboarding, and frontend
-integration will be implemented in future PRs.
+Public registration, organization onboarding, invitations, and set-password
+flows remain outside this backend's current scope.
+
+The authentication rate limiter is intentionally process-local and resets when
+the server restarts. A shared store such as Redis is needed before horizontally
+scaling the API.
