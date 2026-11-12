@@ -1,4 +1,4 @@
-######################################## DATA SCIENCE ########################################
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 # Virtual environment files
 */venv/
 venv/
@@ -14,11 +14,6 @@ __pycache__/
 # Others extension files or caches
 *.ini
 .ipynb_checkpoints/
-
-
-
-######################################## WEB DEVELOPMENT ########################################
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Logs
 logs

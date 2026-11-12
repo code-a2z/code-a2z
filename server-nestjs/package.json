@@ -1,10 +1,22 @@
 {
-  "name": "server-nestjs",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "server",
   "private": true,
-  "license": "UNLICENSED",
+  "author": "Avdhesh Varshney",
+  "license": "ISC",
+  "description": "Code A2Z is An open-source, multi-tenant platform for developers. Users belong to one or more organizations, and roles and permissions are scoped per organization. Access is invite-only.",
+  "version": "1.1.1",
+  "keywords": [
+    "code-a2z",
+    "code a2z",
+    "collaboration",
+    "platform",
+    "open-source",
+    "multi-tenant",
+    "organizations",
+    "roles",
+    "permissions",
+    "invite-only"
+  ],
   "type": "module",
   "scripts": {
     "build": "nest build",

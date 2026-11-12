@@ -3,25 +3,29 @@
   "private": true,
   "author": "Avdhesh Varshney",
   "license": "ISC",
-  "description": "Code A2Z is a collaborative blogging platform for developers and writers to create, manage, and share projects with markdown support, customizable templates, and community contributions.",
-  "version": "2.1.1",
+  "description": "Code A2Z is An open-source, multi-tenant platform for developers. Users belong to one or more organizations, and roles and permissions are scoped per organization. Access is invite-only.",
+  "version": "1.1.1",
   "keywords": [
     "code-a2z",
     "code a2z",
     "collaboration",
     "platform",
     "open-source",
-    "projects"
+    "multi-tenant",
+    "organizations",
+    "roles",
+    "permissions",
+    "invite-only"
   ],
   "type": "commonjs",
   "main": "index.js",
-  "homepage": "https://github.com/Code-A2Z/code-a2z#readme",
+  "homepage": "https://github.com/code-a2z/code-a2z#readme",
   "bugs": {
-    "url": "https://github.com/Code-A2Z/code-a2z/issues"
+    "url": "https://github.com/code-a2z/code-a2z/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Code-A2Z/code-a2z.git"
+    "url": "git+https://github.com/code-a2z/code-a2z.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

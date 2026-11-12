@@ -7,18 +7,6 @@
 <div align="center">
 
   <p>
-    <a href="https://code-a2z-server.vercel.app/">
-      <img src="https://img.shields.io/badge/Server%20Link-CC2927?style=for-the-badge&logo=render&logoColor=white">
-    </a>
-    <a href="https://code-a2z.vercel.app/">
-      <img src="https://img.shields.io/badge/Client%20Link-4285F4?style=for-the-badge&logo=vercel&logoColor=white">
-    </a>
-    <a href="https://documenter.getpostman.com/view/46893887/2sB3QNp8fM">
-      <img src="https://img.shields.io/badge/API%20Docs-FF6C37?style=for-the-badge&logo=postman&logoColor=white">
-    </a>
-  </p>
-
-  <p>
     <a href="https://www.buymeacoffee.com/avdheshvarshney">
       <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" />
     </a>
