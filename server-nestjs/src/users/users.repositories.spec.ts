@@ -17,7 +17,10 @@ describe('native user repositories', () => {
   const insertOne = vi.fn().mockResolvedValue({ insertedId });
   const createIndexes = vi.fn().mockResolvedValue([]);
   const findOne = vi.fn().mockResolvedValue(null);
-  const updateOne = vi.fn().mockResolvedValue({ matchedCount: 1 });
+  const updateOne = vi.fn().mockResolvedValue({
+    matchedCount: 1,
+    modifiedCount: 1,
+  });
   const collection = vi.fn().mockReturnValue({
     createIndexes,
     findOne,
@@ -36,6 +39,29 @@ describe('native user repositories', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('marks an unverified subscriber email as verified', async () => {
+    const repository = new SubscribersRepository(database);
+    const subscriberId = new ObjectId();
+
+    await expect(
+      repository.markEmailVerified(subscriberId, 'test@example.com'),
+    ).resolves.toBe(true);
+
+    expect(updateOne).toHaveBeenCalledWith(
+      {
+        _id: subscriberId,
+        email: 'test@example.com',
+        email_verified_at: null,
+      },
+      {
+        $set: {
+          email_verified_at: new Date('2026-01-02T03:04:05.000Z'),
+          updatedAt: new Date('2026-01-02T03:04:05.000Z'),
+        },
+      },
+    );
   });
 
   it('creates all user-related indexes on their original collections', async () => {
@@ -148,6 +174,63 @@ describe('native user repositories', () => {
     );
   });
 
+  it('returns false when email verification updates nothing', async () => {
+    const repository = new SubscribersRepository(database);
+    const subscriberId = new ObjectId();
+
+    // Subscriber exists but email is already verified
+    updateOne.mockResolvedValueOnce({
+      matchedCount: 0,
+      modifiedCount: 0,
+    });
+
+    await expect(
+      repository.markEmailVerified(subscriberId, 'test@example.com'),
+    ).resolves.toBe(false);
+
+    // Subscriber does not exist
+    updateOne.mockResolvedValueOnce({
+      matchedCount: 0,
+      modifiedCount: 0,
+    });
+
+    await expect(
+      repository.markEmailVerified(new ObjectId(), 'test@example.com'),
+    ).resolves.toBe(false);
+  });
+
+  it('rejects verification when the expected email does not match', async () => {
+    const repository = new SubscribersRepository(database);
+    const subscriberId = new ObjectId();
+
+    // Simulate MongoDB finding no matching document
+    updateOne.mockResolvedValueOnce({
+      matchedCount: 0,
+      modifiedCount: 0,
+    });
+
+    const result = await repository.markEmailVerified(
+      subscriberId,
+      'old@gmail.com',
+    );
+
+    expect(result).toBe(false);
+
+    expect(updateOne).toHaveBeenCalledWith(
+      {
+        _id: subscriberId,
+        email: 'old@gmail.com',
+        email_verified_at: null,
+      },
+      {
+        $set: {
+          email_verified_at: new Date('2026-01-02T03:04:05.000Z'),
+          updatedAt: new Date('2026-01-02T03:04:05.000Z'),
+        },
+      },
+    );
+  });
+
   it('preserves subscriber fields and defaults before insert', async () => {
     const repository = new SubscribersRepository(database);
 
@@ -155,6 +238,7 @@ describe('native user repositories', () => {
 
     expect(insertOne).toHaveBeenCalledWith({
       email: 'TEST@example.com',
+      email_verified_at: null,
       is_subscribed: true,
       subscribed_at: new Date('2026-01-02T03:04:05.000Z'),
       unsubscribed_at: null,

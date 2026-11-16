@@ -37,6 +37,29 @@ export class SubscribersRepository implements OnApplicationBootstrap {
     return this.collection.findOne({ email });
   }
 
+  async markEmailVerified(
+    id: ObjectId,
+    expectedEmail: string,
+  ): Promise<boolean> {
+    const now = new Date();
+
+    const result = await this.collection.updateOne(
+      {
+        _id: id,
+        email: expectedEmail,
+        email_verified_at: null,
+      },
+      {
+        $set: {
+          email_verified_at: now,
+          updatedAt: now,
+        },
+      },
+    );
+
+    return result.modifiedCount === 1;
+  }
+
   private get collection(): Collection<Subscriber> {
     return this.database
       .getDb()

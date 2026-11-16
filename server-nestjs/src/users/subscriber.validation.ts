@@ -28,6 +28,7 @@ export function prepareSubscriber(
         ? new Date(now)
         : readDate(subscriber.subscribed_at, 'subscribed_at'),
     unsubscribed_at: normalizedUnsubscribedAt,
+    email_verified_at: null,
     joinedAt: new Date(now),
     updatedAt: new Date(now),
   };
