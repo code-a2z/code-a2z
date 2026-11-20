@@ -10,7 +10,7 @@ export function LogoMark({ className }: { className?: string }) {
       )}
       aria-hidden="true"
     >
-      A2Z
+      A2Z*
     </span>
   );
 }
